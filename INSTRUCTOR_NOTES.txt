@@ -1,0 +1,72 @@
+# Quick Instructor Notes
+
+## Pre-Class Setup (5 min)
+1. Provision EC2 instances (one per student)
+2. Distribute SSH keys
+3. Test one deployment yourself
+4. Have OpenAI keys ready
+
+## Class Flow (90 min)
+
+### Introduction (10 min)
+- Explain what we're building
+- Show final result
+- Discuss use cases
+
+### Hands-On Deployment (55 min)
+- Students follow SETUP.md
+- Walk through steps together
+- Help with troubleshooting
+
+### Testing & Exploration (15 min)
+- Run test_api.sh
+- Explore Swagger UI
+- Try custom queries
+
+### Wrap-Up (10 min)
+- Q&A
+- Discuss extensions
+- Share resources
+
+## Common Questions
+
+Q: "Can I use this in production?"
+A: Yes, but add: SSL, rate limiting, monitoring, backups
+
+Q: "How much will this cost?"
+A: ~$35/month for EC2 + OpenAI usage (~$0.01-0.05 per conversation)
+
+Q: "Can I modify the code?"
+A: Absolutely! It's yours. Check src/ directory.
+
+Q: "What if OpenAI is down?"
+A: API will still run, but embeddings/search won't work
+
+## Success Metrics
+- All students deploy successfully
+- Everyone can add & search memories
+- Students understand the architecture
+- Can explain vector vs relational DBs
+
+## Cleanup After Class
+sudo docker stop mem0_api mem0_qdrant
+sudo docker rm mem0_api mem0_qdrant
+# OR terminate EC2 instances
+
+## Cost
+Per student: ~$0.10 for 2-hour lab
+Class of 30: ~$3.00 total
+
+## Files Students Need
+- README.md (overview)
+- SETUP.md (deployment steps)
+- API.md (endpoint reference)
+- test_api.sh (testing)
+- All code files (src/, deployment/, requirements.txt, .env.template)
+
+## Files YOU Need
+- LAB_GUIDE.md (teaching guide)
+- INSTRUCTOR_NOTES.txt (this file)
+
+Good luck! 🚀
+

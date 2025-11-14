@@ -1,0 +1,271 @@
+"""
+Admin and Business Intelligence routes
+System stats, user activity, triggers, database health, Slack integration
+"""
+
+from fastapi import APIRouter, HTTPException, Depends
+from dependencies import (
+    verify_admin_key,
+    logger,
+    BI_ENABLED,
+    bi
+)
+from business_intelligence import format_for_slack
+
+router = APIRouter(prefix="/admin", tags=["Admin & Business Intelligence"])
+
+
+@router.get("/stats")
+async def get_system_stats(admin_key: str = Depends(verify_admin_key)):
+    """
+    Get system overview stats (for Slack /mem0-stats command)
+    Requires X-Admin-Key header
+    """
+    if not BI_ENABLED:
+        return {"error": "Business Intelligence not enabled"}
+    
+    try:
+        stats = bi.get_system_overview()
+        return {
+            "status": "success",
+            "data": stats
+        }
+    except Exception as e:
+        logger.error(f"Error getting system stats: {str(e)}")
+        raise HTTPException(status_code=500, detail=str(e))
+
+
+@router.post("/slack/stats")
+async def slack_system_stats():
+    """
+    Slack slash command endpoint for /mem0-stats
+    No auth required - validated by Slack signing secret
+    """
+    if not BI_ENABLED:
+        return {"text": "Business Intelligence not enabled"}
+    
+    try:
+        stats = bi.get_system_overview()
+        return format_for_slack(stats, 'system_overview')
+    except Exception as e:
+        logger.error(f"Error in Slack stats: {str(e)}")
+        return {"text": f"Error: {str(e)}"}
+
+
+@router.get("/users")
+async def get_user_activity(
+    days: int = 7,
+    admin_key: str = Depends(verify_admin_key)
+):
+    """Get user activity report (for Slack /mem0-users command)"""
+    if not BI_ENABLED:
+        return {"error": "Business Intelligence not enabled"}
+    
+    try:
+        report = bi.get_user_activity_report(days=days)
+        return {
+            "status": "success",
+            "data": report
+        }
+    except Exception as e:
+        logger.error(f"Error getting user activity: {str(e)}")
+        raise HTTPException(status_code=500, detail=str(e))
+
+
+@router.post("/slack/users")
+async def slack_user_activity():
+    """Slack slash command endpoint for /mem0-users"""
+    if not BI_ENABLED:
+        return {"text": "Business Intelligence not enabled"}
+    
+    try:
+        report = bi.get_user_activity_report(days=7)
+        return format_for_slack(report, 'user_activity')
+    except Exception as e:
+        logger.error(f"Error in Slack user activity: {str(e)}")
+        return {"text": f"Error: {str(e)}"}
+
+
+@router.get("/triggers")
+async def get_trigger_analysis(admin_key: str = Depends(verify_admin_key)):
+    """Get gambling trigger analysis (for Slack /mem0-triggers command)"""
+    if not BI_ENABLED:
+        return {"error": "Business Intelligence not enabled"}
+    
+    try:
+        analysis = bi.get_trigger_analysis()
+        return {
+            "status": "success",
+            "data": analysis
+        }
+    except Exception as e:
+        logger.error(f"Error getting trigger analysis: {str(e)}")
+        raise HTTPException(status_code=500, detail=str(e))
+
+
+@router.post("/slack/triggers")
+async def slack_trigger_analysis():
+    """Slack slash command endpoint for /mem0-triggers"""
+    if not BI_ENABLED:
+        return {"text": "Business Intelligence not enabled"}
+    
+    try:
+        analysis = bi.get_trigger_analysis()
+        return format_for_slack(analysis, 'triggers')
+    except Exception as e:
+        logger.error(f"Error in Slack trigger analysis: {str(e)}")
+        return {"text": f"Error: {str(e)}"}
+
+
+@router.get("/user/{user_id}")
+async def get_user_report(
+    user_id: str,
+    admin_key: str = Depends(verify_admin_key)
+):
+    """Get detailed report for a specific user (for Slack /mem0-user command)"""
+    if not BI_ENABLED:
+        return {"error": "Business Intelligence not enabled"}
+    
+    try:
+        report = bi.get_user_deep_dive(user_id)
+        return {
+            "status": "success",
+            "data": report
+        }
+    except Exception as e:
+        logger.error(f"Error getting user report: {str(e)}")
+        raise HTTPException(status_code=500, detail=str(e))
+
+
+@router.post("/slack/user")
+async def slack_user_report():
+    """
+    Slack slash command endpoint for /mem0-user <user_id>
+    Expects: {"text": "user_id"}
+    """
+    if not BI_ENABLED:
+        return {"text": "Business Intelligence not enabled"}
+    
+    try:
+        # Parse user_id from Slack command
+        # In production, you'd parse request.form['text']
+        # For now, return instructions
+        return {
+            "response_type": "ephemeral",
+            "text": "Usage: /mem0-user <user_id>\nExample: /mem0-user chad_123"
+        }
+    except Exception as e:
+        logger.error(f"Error in Slack user report: {str(e)}")
+        return {"text": f"Error: {str(e)}"}
+
+
+@router.get("/common-memories")
+async def get_common_memories(
+    limit: int = 20,
+    admin_key: str = Depends(verify_admin_key)
+):
+    """Get common memory patterns across all users"""
+    if not BI_ENABLED:
+        return {"error": "Business Intelligence not enabled"}
+    
+    try:
+        analysis = bi.get_common_memories_analysis(limit=limit)
+        return {
+            "status": "success",
+            "data": analysis
+        }
+    except Exception as e:
+        logger.error(f"Error getting common memories: {str(e)}")
+        raise HTTPException(status_code=500, detail=str(e))
+
+
+@router.get("/database-health")
+async def get_database_health(admin_key: str = Depends(verify_admin_key)):
+    """Get Qdrant database health metrics"""
+    if not BI_ENABLED:
+        return {"error": "Business Intelligence not enabled"}
+    
+    try:
+        health = bi.get_database_health()
+        return {
+            "status": "success",
+            "data": health
+        }
+    except Exception as e:
+        logger.error(f"Error getting database health: {str(e)}")
+        raise HTTPException(status_code=500, detail=str(e))
+
+
+@router.get("/all-memories")
+async def get_all_memories_across_users(
+    limit: int = 100,
+    admin_key: str = Depends(verify_admin_key)
+):
+    """
+    Get ALL memories across ALL users (Admin only)
+    
+    This queries Qdrant directly to retrieve memories without user filtering.
+    Perfect for business owners who want to see everything.
+    
+    Args:
+        limit: Maximum number of memories to return (default: 100, max: 1000)
+    """
+    try:
+        import requests
+        import os
+        
+        # Cap the limit
+        limit = min(limit, 1000)
+        
+        # Query Qdrant directly
+        qdrant_host = os.getenv("QDRANT_HOST", "mem0_qdrant")
+        qdrant_port = os.getenv("QDRANT_PORT", "6333")
+        qdrant_url = f"http://{qdrant_host}:{qdrant_port}"
+        
+        # Scroll through all points in the mem0 collection
+        response = requests.post(
+            f"{qdrant_url}/collections/mem0/points/scroll",
+            json={
+                "limit": limit,
+                "with_payload": True,
+                "with_vector": False
+            }
+        )
+        
+        if response.status_code != 200:
+            raise HTTPException(
+                status_code=500,
+                detail=f"Qdrant error: {response.text}"
+            )
+        
+        data = response.json()
+        points = data.get("result", {}).get("points", [])
+        
+        # Format the results
+        memories = []
+        for point in points:
+            payload = point.get("payload", {})
+            memories.append({
+                "id": point.get("id"),
+                "memory": payload.get("data", ""),
+                "user_id": payload.get("user_id"),
+                "agent_id": payload.get("agent_id"),
+                "run_id": payload.get("run_id"),
+                "created_at": payload.get("created_at"),
+                "updated_at": payload.get("updated_at"),
+                "metadata": payload.get("metadata", {})
+            })
+        
+        return {
+            "status": "success",
+            "data": {
+                "total": len(memories),
+                "limit": limit,
+                "memories": memories
+            }
+        }
+        
+    except Exception as e:
+        logger.error(f"Error getting all memories: {str(e)}")
+        raise HTTPException(status_code=500, detail=str(e))
+
