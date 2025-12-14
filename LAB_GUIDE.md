@@ -142,6 +142,7 @@ For students who finish early:
 1. Modify the FastAPI code to add a custom endpoint
 2. Set up nginx reverse proxy with SSL
 3. Implement rate limiting
+4. **AWS-only track**: switch embeddings + LLM to **AWS Bedrock** (Titan + Claude) by editing `.env` (see `SETUP.md` optional track and `ARCHITECTURE.md`)
 
 ---
 

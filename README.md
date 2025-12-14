@@ -13,10 +13,11 @@ Your App → FastAPI (Port 8000) → Mem0 SDK → Qdrant (Vector DB)
 ```
 
 **Features:**
+
 - REST API for AI memory management
 - Semantic search with vector embeddings
 - User isolation & session management
-- OpenAI integration for embeddings
+- OpenAI **or** AWS Bedrock (optional track) for embeddings/LLM
 - Docker containerized deployment
 
 ---
@@ -24,7 +25,7 @@ Your App → FastAPI (Port 8000) → Mem0 SDK → Qdrant (Vector DB)
 ## Prerequisites
 
 - AWS EC2 instance (t3.medium, Amazon Linux 2023)
-- OpenAI API key
+- OpenAI API key **or** AWS Bedrock access (optional AWS-only track)
 - Basic Docker knowledge
 
 ---
@@ -32,17 +33,20 @@ Your App → FastAPI (Port 8000) → Mem0 SDK → Qdrant (Vector DB)
 ## Quick Start
 
 ### 1. Start Here (Students)
+
 ```bash
 # Follow the step-by-step deployment guide
 cat SETUP.md
 ```
 
 ### 2. Test Your API (Students)
+
 ```bash
 ./test_api.sh
 ```
 
 ### 3. Use Swagger UI (Students)
+
 Visit: `http://YOUR_EC2_IP:8000/docs`
 
 ---
@@ -67,12 +71,12 @@ mem0_deployment_lab/
 
 ## Stack Components
 
-| Component | Technology | Port |
-|-----------|-----------|------|
-| API Server | FastAPI + Mem0 SDK | 8000 |
-| Vector DB | Qdrant | 6333 |
-| Embeddings | OpenAI (text-embedding-3-small) | - |
-| LLM | OpenAI (gpt-4o-mini) | - |
+| Component  | Technology                      | Port |
+| ---------- | ------------------------------- | ---- |
+| API Server | FastAPI + Mem0 SDK              | 8000 |
+| Vector DB  | Qdrant                          | 6333 |
+| Embeddings | OpenAI (text-embedding-3-small) | -    |
+| LLM        | OpenAI (gpt-4o-mini)            | -    |
 
 ---
 
@@ -107,4 +111,3 @@ mem0_deployment_lab/
 ---
 
 **Ready to deploy?** → Open `SETUP.md`
-

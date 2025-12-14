@@ -74,6 +74,23 @@ nano .env
 - `OPENAI_API_KEY` - Your OpenAI API key
 - `API_KEY` - Output from `openssl rand -hex 32`
 
+### Optional Track (AWS-only): Bedrock Titan embeddings (and Bedrock LLM)
+If you want to **avoid OpenAI entirely**, set these in `.env`:
+
+- **Providers**
+  - `LLM_PROVIDER=aws_bedrock`
+  - `EMBEDDER_PROVIDER=aws_bedrock`
+- **Region**
+  - `AWS_REGION=us-east-1` (or your Bedrock-enabled region)
+- **Models**
+  - `EMBEDDER_MODEL=amazon.titan-embed-text-v1`
+  - `LLM_MODEL=anthropic.claude-3-5-sonnet-20240620-v1:0` (or another Bedrock model you have access to)
+- **Credentials**
+  - **Preferred on EC2**: attach an **IAM role** with Bedrock permissions (no keys in `.env`)
+  - Or set `AWS_ACCESS_KEY_ID` / `AWS_SECRET_ACCESS_KEY` (and optional `AWS_SESSION_TOKEN`)
+
+If you use this AWS-only track, you **do not need** `OPENAI_API_KEY`.
+
 ---
 
 ## Step 5: Build Docker Image

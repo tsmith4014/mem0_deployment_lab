@@ -44,14 +44,62 @@ async def verify_admin_key(admin_key: str = Security(admin_key_header)):
 # Mem0 configuration
 def get_mem0_config():
     """Build Mem0 configuration from environment"""
+    llm_provider = os.getenv("LLM_PROVIDER", "openai").strip()
+    embedder_provider = os.getenv("EMBEDDER_PROVIDER", "openai").strip()
+
+    openai_api_key = os.getenv("OPENAI_API_KEY")
+
+    # Fail fast only when OpenAI is actually required
+    if (llm_provider == "openai" or embedder_provider == "openai") and not openai_api_key:
+        raise RuntimeError(
+            "OPENAI_API_KEY is required when LLM_PROVIDER=openai or EMBEDDER_PROVIDER=openai. "
+            "If you want an AWS-only track, set LLM_PROVIDER=aws_bedrock and EMBEDDER_PROVIDER=aws_bedrock."
+        )
+
     return {
         "llm": {
-            "provider": "openai",
-            "config": {
-                "model": os.getenv("LLM_MODEL", "gpt-4o-mini"),
-                "temperature": float(os.getenv("LLM_TEMPERATURE", "0.7")),
-                "api_key": os.getenv("OPENAI_API_KEY")
-            }
+            "provider": llm_provider,
+            "config": (
+                {
+                    "model": os.getenv("LLM_MODEL", "gpt-4o-mini"),
+                    "temperature": float(os.getenv("LLM_TEMPERATURE", "0.7")),
+                    "api_key": openai_api_key,
+                }
+                if llm_provider == "openai"
+                else {
+                    # AWS Bedrock LLM (optional AWS-only track)
+                    # Credentials can come from env vars OR instance profile (recommended on EC2).
+                    "model": os.getenv("LLM_MODEL", ""),
+                    "temperature": float(os.getenv("LLM_TEMPERATURE", "0.7")),
+                    "max_tokens": int(os.getenv("LLM_MAX_TOKENS", "2000")),
+                    "top_p": float(os.getenv("LLM_TOP_P", "0.9")),
+                    "top_k": int(os.getenv("LLM_TOP_K", "1")),
+                    "aws_region": os.getenv("AWS_REGION", ""),
+                    "aws_access_key_id": os.getenv("AWS_ACCESS_KEY_ID", "") or None,
+                    "aws_secret_access_key": os.getenv("AWS_SECRET_ACCESS_KEY", "") or None,
+                    "aws_session_token": os.getenv("AWS_SESSION_TOKEN", "") or None,
+                    "aws_profile": os.getenv("AWS_PROFILE", "") or None,
+                }
+            ),
+        },
+        "embedder": {
+            "provider": embedder_provider,
+            "config": (
+                {
+                    # OpenAI embeddings (default)
+                    "model": os.getenv("EMBEDDER_MODEL", "text-embedding-3-small"),
+                    "api_key": openai_api_key,
+                    "openai_base_url": os.getenv("OPENAI_BASE_URL") or None,
+                }
+                if embedder_provider == "openai"
+                else {
+                    # AWS Bedrock embeddings (Titan recommended)
+                    "model": os.getenv("EMBEDDER_MODEL", "amazon.titan-embed-text-v1"),
+                    "aws_region": os.getenv("AWS_REGION", ""),
+                    "aws_access_key_id": os.getenv("AWS_ACCESS_KEY_ID", "") or None,
+                    "aws_secret_access_key": os.getenv("AWS_SECRET_ACCESS_KEY", "") or None,
+                }
+            ),
         },
         "vector_store": {
             "provider": "qdrant",

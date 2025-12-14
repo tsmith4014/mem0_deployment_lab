@@ -81,43 +81,29 @@ For production app with 1000 users:
 
 ### Option 1: AWS Bedrock (Titan/Claude)
 
-**Change in `.env`:**
+This repo supports Bedrock **without code changes** (it’s controlled by `.env`).
+
+**AWS-only track (no OpenAI):**
 
 ```bash
-# Replace OpenAI with AWS Bedrock
-AWS_ACCESS_KEY_ID=your_aws_key
-AWS_SECRET_ACCESS_KEY=your_aws_secret
+# Switch providers
+LLM_PROVIDER=aws_bedrock
+EMBEDDER_PROVIDER=aws_bedrock
+
+# Pick models (examples)
+EMBEDDER_MODEL=amazon.titan-embed-text-v1
+LLM_MODEL=anthropic.claude-3-5-sonnet-20240620-v1:0
+
+# Region (must be Bedrock-enabled)
 AWS_REGION=us-east-1
+
+# Credentials (optional on EC2 if using an instance role)
+# AWS_ACCESS_KEY_ID=...
+# AWS_SECRET_ACCESS_KEY=...
+# AWS_SESSION_TOKEN=...
 ```
 
-**Change in `dependencies.py`:**
-
-```python
-def get_mem0_config():
-    return {
-        "llm": {
-            "provider": "aws_bedrock",
-            "config": {
-                "model": "anthropic.claude-3-sonnet-20240229-v1:0",
-                "aws_access_key_id": os.getenv("AWS_ACCESS_KEY_ID"),
-                "aws_secret_access_key": os.getenv("AWS_SECRET_ACCESS_KEY"),
-                "aws_region": os.getenv("AWS_REGION", "us-east-1")
-            }
-        },
-        "embeddings": {
-            "provider": "aws_bedrock",
-            "config": {
-                "model": "amazon.titan-embed-text-v1"
-            }
-        },
-        "vector_store": {
-            "provider": "qdrant",
-            "config": {
-                "url": f"http://{os.getenv('QDRANT_HOST', 'localhost')}:6333"
-            }
-        }
-    }
-```
+**Important:** On EC2, the cleanest approach is an **IAM role** on the instance with Bedrock permissions (no long-lived keys in `.env`).
 
 **Pros:**
 

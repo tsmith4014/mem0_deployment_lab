@@ -21,7 +21,21 @@ services:
     ports:
       - "8000:8000"
     environment:
+      # Provider selection (default is OpenAI)
+      - LLM_PROVIDER=${LLM_PROVIDER:-openai}
+      - EMBEDDER_PROVIDER=${EMBEDDER_PROVIDER:-openai}
+
+      # OpenAI (only required if using OpenAI provider)
       - OPENAI_API_KEY=${OPENAI_API_KEY}
+      - OPENAI_BASE_URL=${OPENAI_BASE_URL}
+
+      # AWS Bedrock (only required if using aws_bedrock provider; creds optional on EC2 if using IAM role)
+      - AWS_REGION=${AWS_REGION}
+      - AWS_ACCESS_KEY_ID=${AWS_ACCESS_KEY_ID}
+      - AWS_SECRET_ACCESS_KEY=${AWS_SECRET_ACCESS_KEY}
+      - AWS_SESSION_TOKEN=${AWS_SESSION_TOKEN}
+      - AWS_PROFILE=${AWS_PROFILE}
+
       - QDRANT_HOST=qdrant
       - QDRANT_PORT=6333
       - API_HOST=0.0.0.0
@@ -29,6 +43,10 @@ services:
       - API_KEY=${API_KEY}
       - LLM_MODEL=${LLM_MODEL:-gpt-4o-mini}
       - LLM_TEMPERATURE=${LLM_TEMPERATURE:-0.7}
+      - LLM_MAX_TOKENS=${LLM_MAX_TOKENS:-2000}
+      - LLM_TOP_P=${LLM_TOP_P:-0.9}
+      - LLM_TOP_K=${LLM_TOP_K:-1}
+      - EMBEDDER_MODEL=${EMBEDDER_MODEL:-text-embedding-3-small}
     depends_on:
       - qdrant
     restart: unless-stopped

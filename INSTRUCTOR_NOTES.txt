@@ -42,6 +42,10 @@ A: Absolutely! It's yours. Check src/ directory.
 Q: "What if OpenAI is down?"
 A: API will still run, but embeddings/search won't work
 
+Q: "Can we stay fully inside AWS (no OpenAI)?"
+A: Yes. Use the optional AWS-only track (Bedrock) in `SETUP.md` and `ARCHITECTURE.md`:
+   set `LLM_PROVIDER=aws_bedrock` and `EMBEDDER_PROVIDER=aws_bedrock`, plus `AWS_REGION` and models.
+
 ## Success Metrics
 - All students deploy successfully
 - Everyone can add & search memories
