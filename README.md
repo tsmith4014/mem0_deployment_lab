@@ -31,17 +31,18 @@ Your App → FastAPI (Port 8000) → Mem0 SDK → Qdrant (Vector DB)
 
 ## Quick Start
 
-### 1. Follow Setup Guide
+### 1. Start Here (Students)
 ```bash
+# Follow the step-by-step deployment guide
 cat SETUP.md
 ```
 
-### 2. Test Your API
+### 2. Test Your API (Students)
 ```bash
 ./test_api.sh
 ```
 
-### 3. Use Swagger UI
+### 3. Use Swagger UI (Students)
 Visit: `http://YOUR_EC2_IP:8000/docs`
 
 ---
@@ -50,7 +51,11 @@ Visit: `http://YOUR_EC2_IP:8000/docs`
 
 ```
 mem0_deployment_lab/
-├── SETUP.md              # Step-by-step deployment guide
+├── SETUP.md              # START HERE (students): deploy to EC2
+├── API.md                # Students: endpoint reference + examples
+├── ARCHITECTURE.md       # Students: how it works + Bedrock alternative
+├── LAB_GUIDE.md          # Instructors: lesson plan + timing + checkpoints
+├── INSTRUCTOR_NOTES.txt  # Instructors: quick run-of-show + reminders
 ├── src/                  # FastAPI application
 ├── deployment/           # Docker configuration
 ├── requirements.txt      # Python dependencies
@@ -71,7 +76,7 @@ mem0_deployment_lab/
 
 ---
 
-## Cost Estimate
+## Cost Estimate (Rough)
 
 - EC2 t3.medium: ~$30/month
 - OpenAI API: ~$0.01-0.05 per conversation
@@ -81,10 +86,16 @@ mem0_deployment_lab/
 
 ## Documentation
 
-- **SETUP.md** - Complete deployment steps (START HERE)
-- **ARCHITECTURE.md** - How it works + AWS Bedrock alternative
-- **API.md** - API endpoint reference
-- Swagger UI: `http://your-server:8000/docs`
+- **Students (do in order)**
+  - `SETUP.md`: deploy the stack + configure `.env`
+  - `test_api.sh`: run smoke tests against the API
+  - `API.md`: copy/paste examples for each endpoint
+  - `ARCHITECTURE.md`: understand why we need an LLM/embeddings + Bedrock option
+- **Instructors**
+  - `LAB_GUIDE.md`: structure, timing, checkpoints, extensions
+  - `INSTRUCTOR_NOTES.txt`: quick reminders and common student pitfalls
+- **Interactive docs**
+  - Swagger UI: `http://your-server:8000/docs`
 
 ---
 

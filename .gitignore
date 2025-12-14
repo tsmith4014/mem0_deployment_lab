@@ -4,6 +4,10 @@
 !.env.template
 !env_template.txt
 
+# Local-only docs (not committed)
+FIXES_APPLIED.md
+local_notes/
+
 # Python
 __pycache__/
 *.py[cod]
