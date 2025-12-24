@@ -13,4 +13,26 @@ output "swagger_url" {
   description = "Swagger UI URL."
 }
 
+output "api_key" {
+  value       = local.effective_api_key
+  description = "API key for Swagger / memory endpoints. Get with: terraform output -raw api_key"
+  sensitive   = true
+}
+
+output "admin_api_key" {
+  value       = local.effective_admin_api_key
+  description = "Admin API key for /admin endpoints. Get with: terraform output -raw admin_api_key"
+  sensitive   = true
+}
+
+output "ssm_api_key_name" {
+  value       = aws_ssm_parameter.api_key.name
+  description = "SSM Parameter Store name that holds the API key."
+}
+
+output "ssm_admin_api_key_name" {
+  value       = aws_ssm_parameter.admin_api_key.name
+  description = "SSM Parameter Store name that holds the admin API key."
+}
+
 
