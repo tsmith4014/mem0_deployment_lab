@@ -1,0 +1,45 @@
+# =========================
+# Mem0 Deployment Lab
+# Terraform Overrides
+# =========================
+
+# Naming / tagging
+project_name = "mem0-deployment-lab"
+owner        = "student"
+
+# AWS
+aws_region = "us-east-1"
+
+# EC2
+instance_type         = "t3.medium"
+root_volume_size_gb   = 30
+ssh_key_name          = ""              # optional (recommended). Set to your existing EC2 key pair name.
+allowed_ssh_cidr      = "0.0.0.0/0"     # change to YOUR_IP/32 for safety
+expose_qdrant_public  = false           # keep false for labs unless you need it
+
+# Repo bootstrapping
+repo_url  = "https://github.com/tsmith4014/mem0_deployment_lab.git"
+repo_ref  = "main"                       # branch/tag/sha
+
+# App
+api_port = 8000
+
+# AI provider mode
+# - "openai": use OpenAI for embeddings + LLM
+# - "aws":    use AWS Bedrock (Titan embeddings + Bedrock LLM)
+ai_mode = "openai"
+
+# OpenAI (required if ai_mode = "openai")
+openai_api_key = "REPLACE_ME"
+openai_base_url = ""                    # optional
+
+# AWS Bedrock (used if ai_mode = "aws")
+aws_region_runtime = "us-east-1"         # Bedrock runtime region (can differ, but usually same as aws_region)
+embedder_model     = "amazon.titan-embed-text-v1"
+llm_model          = "anthropic.claude-3-5-sonnet-20240620-v1:0"
+
+# API keys for this service (recommended: let Terraform generate; leave blank)
+api_key       = ""                       # leave blank to auto-generate
+admin_api_key = ""                       # leave blank to default to api_key
+
+

@@ -98,6 +98,9 @@ mem0_deployment_lab/
 - **Instructors**
   - `LAB_GUIDE.md`: structure, timing, checkpoints, extensions
   - `INSTRUCTOR_NOTES.txt`: quick reminders and common student pitfalls
+- **Infrastructure (optional)**
+  - `infra/README.md`: Terraform overview
+  - `infra/terraform/README.md`: one-command AWS deploy (`terraform apply`)
 - **Interactive docs**
   - Swagger UI: `http://your-server:8000/docs`
 

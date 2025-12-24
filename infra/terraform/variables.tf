@@ -1,0 +1,130 @@
+variable "project_name" {
+  type        = string
+  description = "Prefix used for naming AWS resources."
+  default     = "mem0-deployment-lab"
+}
+
+variable "owner" {
+  type        = string
+  description = "Tag value for ownership (e.g., instructor name or student handle)."
+  default     = "student"
+}
+
+variable "aws_region" {
+  type        = string
+  description = "AWS region for infrastructure resources."
+  default     = "us-east-1"
+}
+
+variable "instance_type" {
+  type        = string
+  description = "EC2 instance type."
+  default     = "t3.medium"
+}
+
+variable "root_volume_size_gb" {
+  type        = number
+  description = "Root EBS volume size (GB)."
+  default     = 30
+}
+
+variable "ssh_key_name" {
+  type        = string
+  description = "Existing EC2 Key Pair name to enable SSH. Leave empty to disable SSH access."
+  default     = ""
+}
+
+variable "allowed_ssh_cidr" {
+  type        = string
+  description = "CIDR allowed to SSH to the instance (only used if ssh_key_name is set)."
+  default     = "0.0.0.0/0"
+}
+
+variable "api_port" {
+  type        = number
+  description = "Public API port exposed on the instance."
+  default     = 8000
+}
+
+variable "expose_qdrant_public" {
+  type        = bool
+  description = "If true, open port 6333 to the internet. Default false."
+  default     = false
+}
+
+variable "repo_url" {
+  type        = string
+  description = "Git URL of this repo (public recommended for labs)."
+}
+
+variable "repo_ref" {
+  type        = string
+  description = "Git ref to deploy (branch/tag/sha)."
+  default     = "main"
+}
+
+# AI mode:
+# - openai: OpenAI for embeddings + LLM
+# - aws:    AWS Bedrock for embeddings + LLM (Titan + Claude, etc.)
+variable "ai_mode" {
+  type        = string
+  description = "AI provider mode: openai | aws"
+  default     = "openai"
+  validation {
+    condition     = contains(["openai", "aws"], var.ai_mode)
+    error_message = "ai_mode must be one of: openai, aws"
+  }
+}
+
+variable "openai_api_key" {
+  type        = string
+  description = "OpenAI API key (required when ai_mode=openai)."
+  default     = ""
+  sensitive   = true
+}
+
+variable "openai_base_url" {
+  type        = string
+  description = "Optional OpenAI-compatible base URL."
+  default     = ""
+}
+
+variable "aws_region_runtime" {
+  type        = string
+  description = "AWS Bedrock runtime region (used when ai_mode=aws)."
+  default     = "us-east-1"
+}
+
+variable "embedder_model" {
+  type        = string
+  description = "Embedding model. For Bedrock Titan: amazon.titan-embed-text-v1. For OpenAI: text-embedding-3-small."
+  default     = "text-embedding-3-small"
+}
+
+variable "llm_model" {
+  type        = string
+  description = "LLM model id. For OpenAI: gpt-4o-mini. For Bedrock: e.g. anthropic.claude-3-5-sonnet-20240620-v1:0"
+  default     = "gpt-4o-mini"
+}
+
+variable "llm_temperature" {
+  type        = number
+  description = "LLM temperature."
+  default     = 0.7
+}
+
+variable "api_key" {
+  type        = string
+  description = "API key for this service. Leave blank to auto-generate."
+  default     = ""
+  sensitive   = true
+}
+
+variable "admin_api_key" {
+  type        = string
+  description = "Admin API key. Leave blank to default to api_key."
+  default     = ""
+  sensitive   = true
+}
+
+
