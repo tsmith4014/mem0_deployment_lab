@@ -26,6 +26,16 @@ After apply, Terraform outputs:
 - `api_base_url`
 - `swagger_url`
 - `ec2_public_ip`
+- (sensitive) `api_key` and `admin_api_key` for Swagger testing
+
+## Get the Swagger Key (Recommended)
+
+After `terraform apply`:
+
+```bash
+terraform output -raw api_key
+terraform output -raw admin_api_key
+```
 
 ## What Gets Provisioned
 
