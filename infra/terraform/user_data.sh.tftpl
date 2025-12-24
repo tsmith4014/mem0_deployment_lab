@@ -8,7 +8,7 @@ echo "=== Mem0 Deployment Lab bootstrap starting ==="
 
 # Packages
 dnf update -y
-dnf install -y git jq awscli curl
+dnf install -y git jq awscli
 
 # Ensure AWS CLI has a region (otherwise `aws ssm ...` fails with "You must specify a region")
 export AWS_REGION="${aws_region_runtime}"
@@ -19,17 +19,6 @@ dnf install -y docker
 systemctl enable docker
 systemctl start docker
 usermod -aG docker ec2-user || true
-
-# Docker Compose plugin (preferred). Fallback to standalone docker-compose.
-if dnf install -y docker-compose-plugin; then
-  echo "docker compose plugin installed"
-elif command -v docker-compose >/dev/null 2>&1; then
-  echo "docker-compose already present"
-else
-  echo "Installing standalone docker-compose"
-  curl -L "https://github.com/docker/compose/releases/latest/download/docker-compose-$(uname -s)-$(uname -m)" -o /usr/local/bin/docker-compose
-  chmod +x /usr/local/bin/docker-compose
-fi
 
 mkdir -p "$${APP_DIR}"
 cd "$${APP_DIR}"
@@ -57,7 +46,7 @@ OPENAI_BASE_URL=${openai_base_url}
 
 AWS_REGION=${aws_region_runtime}
 
-QDRANT_HOST=qdrant
+QDRANT_HOST=mem0_qdrant
 QDRANT_PORT=6333
 
 API_HOST=0.0.0.0
@@ -71,14 +60,37 @@ LLM_TEMPERATURE=${llm_temperature}
 EMBEDDER_MODEL=${embedder_model}
 EOF
 
-echo "=== Starting docker compose ==="
+echo "=== Starting containers (docker run) ==="
 
-# Run from repo root; compose file lives in deployment/
-if command -v docker >/dev/null 2>&1 && docker compose version >/dev/null 2>&1; then
-  docker compose -f deployment/docker-compose.yml up -d --build
-else
-  docker-compose -f deployment/docker-compose.yml up -d --build
-fi
+# Create network if missing
+docker network inspect mem0_network >/dev/null 2>&1 || docker network create mem0_network
+
+# Start Qdrant (vector DB)
+docker rm -f mem0_qdrant >/dev/null 2>&1 || true
+docker run -d \
+  --name mem0_qdrant \
+  --network mem0_network \
+  -p 6333:6333 \
+  -p 6334:6334 \
+  -v qdrant_data:/qdrant/storage \
+  -e QDRANT__SERVICE__GRPC_PORT=6334 \
+  --restart unless-stopped \
+  qdrant/qdrant:latest
+
+# Build API image (uses classic docker build; avoids buildx requirement from docker compose)
+docker build -t mem0_api:latest -f deployment/Dockerfile .
+
+# Start Mem0 API
+docker rm -f mem0_api >/dev/null 2>&1 || true
+docker run -d \
+  --name mem0_api \
+  --network mem0_network \
+  -p ${api_port}:${api_port} \
+  --env-file .env \
+  -e QDRANT_HOST=mem0_qdrant \
+  -e QDRANT_PORT=6333 \
+  --restart unless-stopped \
+  mem0_api:latest
 
 echo "=== Mem0 Deployment Lab bootstrap complete ==="
 
