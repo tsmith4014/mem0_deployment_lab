@@ -68,17 +68,16 @@ def get_mem0_config():
                 if llm_provider == "openai"
                 else {
                     # AWS Bedrock LLM (optional AWS-only track)
-                    # Credentials can come from env vars OR instance profile (recommended on EC2).
+                    #
+                    # IMPORTANT: mem0ai currently maps aws_bedrock -> AWSBedrockLLM with BaseLlmConfig.
+                    # So we must only pass BaseLlmConfig-compatible keys here.
+                    #
+                    # AWS region/credentials are read from environment variables (AWS_REGION, IAM role, etc.)
                     "model": os.getenv("LLM_MODEL", ""),
                     "temperature": float(os.getenv("LLM_TEMPERATURE", "0.7")),
                     "max_tokens": int(os.getenv("LLM_MAX_TOKENS", "2000")),
                     "top_p": float(os.getenv("LLM_TOP_P", "0.9")),
                     "top_k": int(os.getenv("LLM_TOP_K", "1")),
-                    "aws_region": os.getenv("AWS_REGION", ""),
-                    "aws_access_key_id": os.getenv("AWS_ACCESS_KEY_ID", "") or None,
-                    "aws_secret_access_key": os.getenv("AWS_SECRET_ACCESS_KEY", "") or None,
-                    "aws_session_token": os.getenv("AWS_SESSION_TOKEN", "") or None,
-                    "aws_profile": os.getenv("AWS_PROFILE", "") or None,
                 }
             ),
         },
