@@ -1,4 +1,4 @@
-# Terraform: One-Command AWS Deploy (EC2 + Docker Compose)
+# Terraform: One-Command AWS Deploy (EC2 + Docker)
 
 Goal: students can clone this repo, edit a small `terraform.tfvars`, run `terraform apply`, and get a working Mem0 API on EC2.
 
@@ -22,6 +22,7 @@ terraform apply
 ```
 
 After apply, Terraform outputs:
+
 - `api_base_url`
 - `swagger_url`
 - `ec2_public_ip`
@@ -36,10 +37,10 @@ After apply, Terraform outputs:
   - Reads `.env` values from SSM Parameter Store at boot
   - Optional: Bedrock invoke permissions for the AWS-only track
 - **EC2 instance** with `user_data` that:
-  - installs Docker + Docker Compose
+  - installs Docker
   - clones this repo
   - writes `.env`
-  - runs `docker compose up -d --build`
+  - starts Qdrant + API containers (no Docker Compose required)
 
 ## Provider Modes (OpenAI vs AWS-only)
 
@@ -60,6 +61,7 @@ In `terraform.tfvars`:
 - `llm_model = "anthropic.claude-3-5-sonnet-20240620-v1:0"` (or any Bedrock model you have access to)
 
 Credentials:
+
 - **Best on EC2**: attach an IAM role to the instance (Terraform does this) and do **not** store long-lived AWS keys in `.env`.
 
 ## Config You’ll Most Likely Change (Students)
@@ -77,10 +79,23 @@ Use `terraform.tfvars.example` as your starting point.
 ## Notes on Secrets
 
 Terraform can’t magically avoid ever handling secrets if you pass them via `terraform.tfvars`.
+
 - This lab stores runtime secrets in **SSM Parameter Store** and fetches them on boot.
 - **Do not commit**:
   - `terraform.tfvars`
   - `terraform.tfstate*`
   - `.terraform/`
 
+## Getting the Swagger API Key
 
+Swagger uses the `X-API-Key` header. The value is stored as an SSM SecureString:
+
+```bash
+aws ssm get-parameter --with-decryption \
+  --name "/<project_name>/API_KEY" \
+  --region <aws_region> \
+  --query Parameter.Value --output text
+```
+
+If you SSH to the instance, it’s also written into:
+- `/opt/<project_name>/repo/.env`

@@ -8,6 +8,36 @@ All endpoints (except `/health`) require `X-API-Key` header:
 -H 'X-API-Key: YOUR_API_KEY_HERE'
 ```
 
+### Swagger UI (Recommended for Testing)
+
+Open Swagger UI:
+- `http://YOUR_EC2_IP:8000/docs`
+
+Click **Authorize** and set:
+- **X-API-Key**: your `API_KEY`
+- **X-Admin-Key**: only needed for `/admin/*` endpoints (you can set it to the same value as `API_KEY` if you didn’t configure a separate admin key)
+
+### Where is my API key?
+
+Your Swagger key is the value of **`API_KEY`**.
+
+- **Manual setup (following `SETUP.md`)**: it’s in your local `.env` file:
+
+```bash
+grep '^API_KEY=' .env
+```
+
+- **Terraform setup (`infra/terraform`)**:
+  - On the EC2 instance: `/opt/<project_name>/repo/.env`
+  - Or from your laptop (AWS CLI):
+
+```bash
+aws ssm get-parameter --with-decryption \
+  --name "/<project_name>/API_KEY" \
+  --region <aws_region> \
+  --query Parameter.Value --output text
+```
+
 ---
 
 ## Core Endpoints

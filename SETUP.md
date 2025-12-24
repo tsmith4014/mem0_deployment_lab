@@ -242,9 +242,30 @@ curl -X POST http://YOUR_EC2_IP:8000/v1/memories/search \
 Open in browser: `http://YOUR_EC2_IP:8000/docs`
 
 1. Click "Authorize"
-2. Enter your API key in both fields
+2. Enter your **API key** in **X-API-Key**
+3. (Optional) Enter your **admin key** in **X-Admin-Key** for `/admin/*` endpoints
+   - If you didn’t set a separate admin key, you can use the same value as `API_KEY`
 3. Click "Authorize" → "Close"
 4. Try endpoints!
+
+### Where do I find the API key?
+
+- If you created `.env` manually:
+
+```bash
+grep '^API_KEY=' .env
+```
+
+- If you deployed with Terraform (`infra/terraform`):
+  - On the EC2 instance: `/opt/<project_name>/repo/.env`
+  - Or via SSM Parameter Store:
+
+```bash
+aws ssm get-parameter --with-decryption \
+  --name "/<project_name>/API_KEY" \
+  --region <aws_region> \
+  --query Parameter.Value --output text
+```
 
 ---
 
