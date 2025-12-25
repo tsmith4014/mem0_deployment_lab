@@ -19,7 +19,7 @@ if OBSERVABILITY_ENABLED:
     from middleware import ObservabilityMiddleware
 
 # Import route modules
-from routes import memory_router, admin_router, health_router
+from routes import memory_router, admin_router, health_router, demo_router
 
 # Initialize FastAPI app with proper OpenAPI security configuration
 app = FastAPI(
@@ -101,6 +101,7 @@ app.add_middleware(
 app.include_router(health_router)        # Health checks, metrics, alerts
 app.include_router(memory_router)        # Memory CRUD operations
 app.include_router(admin_router)         # Business intelligence, admin ops
+app.include_router(demo_router)          # Demo seed endpoints for class
 
 logger.info("All route modules registered")
 

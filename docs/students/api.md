@@ -13,9 +13,11 @@ All endpoints (except `/health`) require `X-API-Key` header:
 ### Swagger UI (Recommended for Testing)
 
 Open Swagger UI:
+
 - `http://YOUR_EC2_IP:8000/docs`
 
 Click **Authorize** and set:
+
 - **X-API-Key**: your `API_KEY`
 - **X-Admin-Key**: only needed for `/admin/*` endpoints (you can set it to the same value as `API_KEY` if you didn’t configure a separate admin key)
 
@@ -51,14 +53,17 @@ aws ssm get-parameter --with-decryption \
 ## Core Endpoints
 
 ### Health Check
+
 ```bash
 GET /health
 ```
+
 No authentication required.
 
 ---
 
 ### Add Memory
+
 ```bash
 POST /v1/memories/add
 Content-Type: application/json
@@ -79,6 +84,7 @@ X-API-Key: YOUR_KEY
 ---
 
 ### Search Memory
+
 ```bash
 POST /v1/memories/search
 Content-Type: application/json
@@ -94,6 +100,7 @@ X-API-Key: YOUR_KEY
 ---
 
 ### Get All Memories
+
 ```bash
 POST /v1/memories/get-all
 Content-Type: application/json
@@ -107,6 +114,7 @@ X-API-Key: YOUR_KEY
 ---
 
 ### Update Memory
+
 ```bash
 PUT /v1/memories/update
 Content-Type: application/json
@@ -121,6 +129,7 @@ X-API-Key: YOUR_KEY
 ---
 
 ### Delete Memory
+
 ```bash
 DELETE /v1/memories/delete
 Content-Type: application/json
@@ -147,6 +156,7 @@ Visit: `http://YOUR_EC2_IP:8000/docs`
 ## Response Format
 
 ### Success
+
 ```json
 {
   "status": "success",
@@ -155,6 +165,7 @@ Visit: `http://YOUR_EC2_IP:8000/docs`
 ```
 
 ### Error
+
 ```json
 {
   "detail": "Error message"
@@ -179,6 +190,7 @@ Visit: `http://YOUR_EC2_IP:8000/docs`
 ## Quick Examples
 
 ### Python
+
 ```python
 import requests
 
@@ -217,6 +229,7 @@ print(response.json())
 ```
 
 ### JavaScript
+
 ```javascript
 const API_URL = "http://YOUR_EC2_IP:8000";
 const API_KEY = "your_api_key";
@@ -260,3 +273,13 @@ const searchMemory = async () => {
 
 **For complete API documentation:** See Swagger UI at `/docs`
 
+---
+
+## Demo: Seed 3 Users (Pop Culture)
+
+These endpoints add a bunch of memories so search results are meaningful.
+They use `infer=false` for deterministic seeding.
+
+- `POST /v1/demo/seed/tony-stark`
+- `POST /v1/demo/seed/leia-organa`
+- `POST /v1/demo/seed/hermione-granger`
