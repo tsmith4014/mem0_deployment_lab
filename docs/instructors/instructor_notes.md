@@ -37,7 +37,7 @@ Notes:
 
 ### Copy/paste IAM policy (attach to the student group)
 
-Yes—an instructor can attach a single IAM policy to the student IAM group to make this lab “just work”.
+An instructor can attach a single IAM policy to the student IAM group to make this lab work.
 
 Below is a **lab-friendly** policy. It is intentionally broader than production least-privilege.
 For real environments, tighten this with tag-based conditions and scoped resources.
@@ -166,19 +166,19 @@ From the AWS Console:
 - Show where config lives (`.env` on instance, SSM parameters, Terraform outputs)
 - Discuss IAM role vs long-lived keys for Bedrock
 
-### Assignment ideas (pick 1–3)
+### Assignments
 
 1. **SSM-first secrets (no tfvars for secrets)**
    - Move any student-provided secrets to SSM created out-of-band (AWS CLI / console), then modify Terraform to read them.
 2. **Monitoring**
    - Add CloudWatch metrics/dashboards (CPU, disk, memory, container logs) and document what “healthy” looks like.
-   - (Stretch) wire alerts into a chat tool.
+   - (Stretch) wire alerts into Slack.
 3. **API / Swagger refactor**
    - Add a new endpoint (e.g., “rotate API keys”) or refactor request/response shapes and update docs.
 4. **Separate API key vs Admin key**
    - Change Terraform to generate two distinct keys by default and update outputs + bootstrap.
 5. **Data-minded extension**
-   - Export `/admin/all-memories` results to a CSV and create a small analysis notebook (top topics, per-user counts, growth over time).
+   - Export `/admin/all-memories` results to a CSV and create a small analysis notebook (top topics, per-user counts, growth over time). Or even better write the Python Machine Learning logic into the API and return the results.
 
 ## Common Questions
 
@@ -206,9 +206,19 @@ A: Yes. This is the default track for this lab. See [`../students/setup.md`](../
 
 ## Cleanup After Class
 
+Default (Terraform):
+
+```bash
+cd infra/terraform
+terraform destroy
+```
+
+Optional (manual Docker path only):
+
+```bash
 sudo docker stop mem0_api mem0_qdrant
 sudo docker rm mem0_api mem0_qdrant
-Or terminate EC2 instances.
+```
 
 ## Cost
 

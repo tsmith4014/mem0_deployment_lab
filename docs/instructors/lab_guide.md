@@ -246,7 +246,7 @@ sudo docker system prune -a
 
 **For 30 students:** ~$3.00 total
 
-**Remember to terminate EC2 instances after lab!**
+**Remember to clean up after lab:** run `terraform destroy` from `infra/terraform`.
 
 ---
 
