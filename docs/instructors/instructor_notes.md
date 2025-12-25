@@ -35,6 +35,89 @@ Notes:
 - This lab does **not require SSH** (we typically leave `ssh_key_name` blank in `terraform.tfvars`).
 - If you want SSH for debugging, instructors can provide a key pair and restrict `allowed_ssh_cidr` to their IP.
 
+### Copy/paste IAM policy (attach to the student group)
+
+Yes—an instructor can attach a single IAM policy to the student IAM group to make this lab “just work”.
+
+Below is a **lab-friendly** policy. It is intentionally broader than production least-privilege.
+For real environments, tighten this with tag-based conditions and scoped resources.
+
+**How to use:**
+
+- Create a managed policy in IAM (or inline policy on the group)
+- Paste the JSON below
+- Attach it to the student group
+
+```json
+{
+  "Version": "2012-10-17",
+  "Statement": [
+    {
+      "Sid": "EC2RunAndDescribe",
+      "Effect": "Allow",
+      "Action": [
+        "ec2:RunInstances",
+        "ec2:TerminateInstances",
+        "ec2:CreateTags",
+        "ec2:Describe*"
+      ],
+      "Resource": "*"
+    },
+    {
+      "Sid": "SecurityGroups",
+      "Effect": "Allow",
+      "Action": [
+        "ec2:CreateSecurityGroup",
+        "ec2:DeleteSecurityGroup",
+        "ec2:AuthorizeSecurityGroupIngress",
+        "ec2:AuthorizeSecurityGroupEgress",
+        "ec2:RevokeSecurityGroupIngress",
+        "ec2:RevokeSecurityGroupEgress"
+      ],
+      "Resource": "*"
+    },
+    {
+      "Sid": "IAMForEC2InstanceRoleAndProfile",
+      "Effect": "Allow",
+      "Action": [
+        "iam:CreateRole",
+        "iam:DeleteRole",
+        "iam:GetRole",
+        "iam:List*",
+        "iam:PassRole",
+        "iam:CreatePolicy",
+        "iam:DeletePolicy",
+        "iam:GetPolicy",
+        "iam:AttachRolePolicy",
+        "iam:DetachRolePolicy",
+        "iam:CreateInstanceProfile",
+        "iam:DeleteInstanceProfile",
+        "iam:AddRoleToInstanceProfile",
+        "iam:RemoveRoleFromInstanceProfile"
+      ],
+      "Resource": "*"
+    },
+    {
+      "Sid": "SSMParameterStoreForEnv",
+      "Effect": "Allow",
+      "Action": [
+        "ssm:PutParameter",
+        "ssm:DeleteParameter",
+        "ssm:GetParameter",
+        "ssm:GetParameters"
+      ],
+      "Resource": "*"
+    },
+    {
+      "Sid": "DecryptSecureStringParameters",
+      "Effect": "Allow",
+      "Action": ["kms:Decrypt"],
+      "Resource": "*"
+    }
+  ]
+}
+```
+
 ### Ensure Bedrock model access is enabled
 
 Bedrock model access is an account/region setting (Terraform can’t enable it automatically).
