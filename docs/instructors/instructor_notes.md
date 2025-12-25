@@ -168,18 +168,13 @@ From the AWS Console:
 
 ### Assignments
 
-1. **SSM-first secrets (no tfvars for secrets)**
-   - Move any student-provided secrets to SSM created out-of-band (AWS CLI / console), then modify Terraform to read them.
-2. **Monitoring**
-   - Add CloudWatch metrics/dashboards (CPU, disk, memory, container logs) and document what “healthy” looks like.
-   - (Stretch) wire alerts into Slack.
-3. **API / Swagger refactor**
-   - Add a new endpoint or refactor request/response shapes and update docs.
-4. **Separate API key vs Admin key**
-   - Change Terraform to generate two distinct keys by default and update outputs + bootstrap.
-5. **Data-minded extension**
-   - Export `/admin/all-memories` results to a CSV and create a small analysis notebook (top topics, per-user counts, growth over time). Or even better write the Python Machine Learning logic into the API and return the results.
-6. **Rotate API keys (new endpoint + Swagger testing)**
+#### Required (do these in order)
+
+1. **Separate API key vs Admin key**
+   - Change Terraform to generate **two distinct keys by default** and update outputs + bootstrap.
+   - First step: generate a distinct `ADMIN_API_KEY` using `random_password` (the same way `API_KEY` is generated), then write it to SSM and into the instance `.env`.
+
+2. **Rotate API keys (new endpoint + Swagger testing)**
    - Create an **admin-only** Swagger endpoint that rotates/creates new API keys.
    - Suggested shape: `POST /admin/keys/rotate` (requires `X-Admin-Key`)
    - Requirements (keep it simple for a bootcamp assignment):
@@ -189,6 +184,23 @@ From the AWS Console:
    - Design choice (students explain tradeoffs):
      - **Easy mode**: rotate keys in-memory (works until the container restarts)
      - **Real mode**: write the new key into **SSM Parameter Store** and restart/reload the API so it takes effect
+
+#### Optional (pick any 2 — SSM-first does NOT count toward the 2)
+
+1. **Monitoring (Qdrant → CloudWatch dashboard)**
+   - Send Qdrant metrics to **CloudWatch** and build a dashboard.
+   - Make it “vector DB-specific” (not just CPU/RAM): things like collection size / point count growth, search request latency, and vector index behavior (what you graph will depend on what Qdrant exposes).
+   - Implementation hint: Qdrant exposes Prometheus-style metrics; students can scrape them and publish to CloudWatch (multiple valid approaches).
+   - (Stretch) wire alerts into Slack.
+
+2. **API / Swagger refactor**
+   - Add a new endpoint or refactor request/response shapes and update docs.
+
+3. **Data-minded extension**
+   - Export `/admin/all-memories` results to a CSV and create a small analysis notebook (top topics, per-user counts, growth over time). Or combine this with one of the other assignments.
+
+4. **SSM-first secrets (bonus / optional, does not count toward the “pick any 2”)**
+   - Move any student-provided secrets to SSM created out-of-band (AWS CLI / console), then modify Terraform to read them.
 
 ## Common Questions
 
