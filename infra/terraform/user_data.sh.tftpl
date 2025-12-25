@@ -1,15 +1,43 @@
 #!/bin/bash
+# Terraform user-data template (rendered by templatefile)
+#
+# File extension note:
+# - `.tftpl` is a Terraform template file. In `main.tf`, Terraform calls:
+#     templatefile(path.module + "/user_data.sh.tftpl", { ...vars... })
+#   which replaces template placeholders in this file before sending the final script to EC2.
+#
+# What comes from where?
+#
+# - From SSM Parameter Store (SecureString secrets, created by Terraform in `main.tf`):
+#   - /<project_name>/API_KEY
+#   - /<project_name>/ADMIN_API_KEY
+#   - /<project_name>/OPENAI_API_KEY (ONLY when ai_mode="openai")
+#
+# - From Terraform variables (terraform.tfvars -> variables.tf -> main.tf -> templatefile):
+#   - Everything else: repo_url, repo_ref, ports, model ids, docker names, region, providers, etc.
+#
+# High-level flow (Terraform-first lab):
+# 1) Student runs `terraform apply` (using their AWS CLI credentials).
+# 2) Terraform creates AWS resources + stores secrets in SSM.
+# 3) EC2 boots and executes THIS script (cloud-init user_data).
+# 4) This script fetches secrets from SSM, writes a local `.env` file on the instance, and starts Docker containers.
+
+# pipefail causes the script to fail if any command in a pipeline fails.
 set -euo pipefail
 
-# Log everything user-data does (so failures are obvious)
+
+# Log everything user-data does (so failures are obvious).
+# If you enabled SSH, you can inspect this on the instance: /var/log/mem0-bootstrap.log
 exec > >(tee -a /var/log/mem0-bootstrap.log) 2>&1
 
+# Create the application directory and clone the repository into it.
 APP_DIR="/opt/${project_name}"
 REPO_DIR="$${APP_DIR}/repo"
 
+# Log the start of the bootstrap process.
 echo "=== Mem0 Deployment Lab bootstrap starting ==="
 
-# Packages
+# Update the packages and install the necessary packages.
 dnf update -y
 dnf install -y git jq awscli
 
@@ -17,15 +45,18 @@ dnf install -y git jq awscli
 export AWS_REGION="${aws_region_runtime}"
 export AWS_DEFAULT_REGION="${aws_region_runtime}"
 
-# Docker
+# Install Docker and start the service.
 dnf install -y docker
 systemctl enable docker
 systemctl start docker
+# Add the ec2-user to the docker group so they can run docker commands without sudo.
 usermod -aG docker ec2-user || true
+# Create the application directory and change to it.
 
 mkdir -p "$${APP_DIR}"
 cd "$${APP_DIR}"
 
+# Clone the repository into the application directory. The if statement is to avoid cloning the repository if it already exists.
 if [ ! -d "$${REPO_DIR}" ]; then
   git clone "${repo_url}" "$${REPO_DIR}"
 fi
@@ -35,15 +66,17 @@ git fetch --all
 git checkout "${repo_ref}"
 echo "Deployed git ref: $(git rev-parse --short HEAD)"
 
-# Pull secrets from SSM
+# Pull secrets from SSM Parameter Store (these are the only values read from SSM in this script).
 API_KEY="$(aws ssm get-parameter --region "${aws_region_runtime}" --with-decryption --name "${ssm_prefix}/API_KEY" --query Parameter.Value --output text)"
 ADMIN_API_KEY="$(aws ssm get-parameter --region "${aws_region_runtime}" --with-decryption --name "${ssm_prefix}/ADMIN_API_KEY" --query Parameter.Value --output text)"
+# If the provider mode is OpenAI, pull the OpenAI API key from SSM.
 OPENAI_API_KEY=""
 if [ "${llm_provider}" = "openai" ] || [ "${embedder_provider}" = "openai" ]; then
   OPENAI_API_KEY="$(aws ssm get-parameter --region "${aws_region_runtime}" --with-decryption --name "${ssm_prefix}/OPENAI_API_KEY" --query Parameter.Value --output text)"
 fi
 
-# Write .env for the app
+# Write a local `.env` file for Docker to pass into the API container.
+# Note: this `.env` file exists ONLY on the EC2 instance (students do not create a local .env in this lab).
 cat > .env <<EOF
 LLM_PROVIDER=${llm_provider}
 EMBEDDER_PROVIDER=${embedder_provider}
@@ -69,10 +102,10 @@ EOF
 
 echo "=== Starting containers (docker run) ==="
 
-# Create network if missing
+# Create network if missing. This is a Docker network that the containers will use to communicate with each other.
 docker network inspect ${docker_network_name} >/dev/null 2>&1 || docker network create ${docker_network_name}
 
-# Start Qdrant (vector DB)
+# Start Qdrant (vector DB). This is a Docker container that runs the Qdrant vector database.
 docker rm -f ${qdrant_container_name} >/dev/null 2>&1 || true
 docker run -d \
   --name ${qdrant_container_name} \
@@ -84,12 +117,12 @@ docker run -d \
   --restart unless-stopped \
   ${qdrant_image}
 
-# Build API image (uses classic docker build; avoids buildx requirements)
+# Build API image (uses classic docker build) There are many ways to do this, this is a simple way.
 echo "=== Building mem0_api image ==="
 docker build -t ${api_image_name} -f deployment/Dockerfile .
 docker images | head -n 20
 
-# Start Mem0 API
+# Start Mem0 API. This is a Docker container that runs the Mem0 API.
 echo "=== Starting mem0_api container ==="
 docker rm -f ${api_container_name} >/dev/null 2>&1 || true
 docker run -d \
