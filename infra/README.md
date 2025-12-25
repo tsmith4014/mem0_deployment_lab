@@ -23,11 +23,11 @@ Terraform supports two modes:
 
 - **Default track (AWS Bedrock + Titan)**
   - Uses the EC2 instance IAM role (recommended)
-  - `LLM_PROVIDER=aws_bedrock`, `EMBEDDER_PROVIDER=aws_bedrock`
-  - `EMBEDDER_MODEL=amazon.titan-embed-text-v1`
+  - `ai_mode = "aws"`
+  - `embedder_model = "amazon.titan-embed-text-v1"`
 - **Optional track (OpenAI)**
   - Uses `OPENAI_API_KEY`
-  - `LLM_PROVIDER=openai`, `EMBEDDER_PROVIDER=openai`
+  - `ai_mode = "openai"`
 
 ## Important Notes (Teaching-friendly)
 

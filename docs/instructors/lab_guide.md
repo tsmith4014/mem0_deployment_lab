@@ -217,18 +217,16 @@ sudo docker system prune -a
 
 | Activity            | Estimated Time | Critical? |
 | ------------------- | -------------- | --------- |
-| EC2 connection      | 5 min          | Yes       |
-| Docker installation | 15 min         | Yes       |
-| File upload         | 5 min          | Yes       |
-| Configuration       | 10 min         | Yes       |
-| Docker build        | 10 min         | Yes       |
-| Start services      | 5 min          | Yes       |
-| Testing             | 15 min         | Yes       |
+| Terraform apply     | 10-15 min      | Yes       |
+| Wait for bootstrap  | 3-8 min        | Yes       |
+| Swagger auth        | 3 min          | Yes       |
+| Seed + search demo  | 15 min         | Yes       |
+| Testing             | 10 min         | Yes       |
 | Swagger exploration | 10 min         | No        |
 | Discussion          | 10 min         | No        |
 
-**Critical path:** ~55 minutes  
-**Full lab:** 85 minutes
+**Critical path:** ~35-45 minutes  
+**Full lab:** 60-90 minutes
 
 ---
 
