@@ -111,11 +111,13 @@ data "aws_iam_policy_document" "ssm_read_params" {
       "ssm:GetParameter",
       "ssm:GetParameters",
     ]
-    resources = [
-      aws_ssm_parameter.api_key.arn,
-      aws_ssm_parameter.admin_api_key.arn,
-      aws_ssm_parameter.openai_api_key.arn,
-    ]
+    resources = concat(
+      [
+        aws_ssm_parameter.api_key.arn,
+        aws_ssm_parameter.admin_api_key.arn,
+      ],
+      var.ai_mode == "openai" ? [aws_ssm_parameter.openai_api_key[0].arn] : []
+    )
   }
 
   # Needed to decrypt SecureString parameters (lab-friendly, broad)
@@ -184,6 +186,7 @@ resource "aws_ssm_parameter" "admin_api_key" {
 }
 
 resource "aws_ssm_parameter" "openai_api_key" {
+  count = var.ai_mode == "openai" ? 1 : 0
   name  = "${local.ssm_prefix}/OPENAI_API_KEY"
   type  = "SecureString"
   value = var.openai_api_key

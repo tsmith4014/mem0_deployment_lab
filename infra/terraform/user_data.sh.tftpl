@@ -38,7 +38,10 @@ echo "Deployed git ref: $(git rev-parse --short HEAD)"
 # Pull secrets from SSM
 API_KEY="$(aws ssm get-parameter --region "${aws_region_runtime}" --with-decryption --name "${ssm_prefix}/API_KEY" --query Parameter.Value --output text)"
 ADMIN_API_KEY="$(aws ssm get-parameter --region "${aws_region_runtime}" --with-decryption --name "${ssm_prefix}/ADMIN_API_KEY" --query Parameter.Value --output text)"
-OPENAI_API_KEY="$(aws ssm get-parameter --region "${aws_region_runtime}" --with-decryption --name "${ssm_prefix}/OPENAI_API_KEY" --query Parameter.Value --output text || echo '')"
+OPENAI_API_KEY=""
+if [ "${llm_provider}" = "openai" ] || [ "${embedder_provider}" = "openai" ]; then
+  OPENAI_API_KEY="$(aws ssm get-parameter --region "${aws_region_runtime}" --with-decryption --name "${ssm_prefix}/OPENAI_API_KEY" --query Parameter.Value --output text)"
+fi
 
 # Write .env for the app
 cat > .env <<EOF
