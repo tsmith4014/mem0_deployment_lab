@@ -21,6 +21,8 @@ terraform init
 terraform apply
 ```
 
+Note: after `terraform apply`, the EC2 instance boots via `user_data` and the API may take **a few minutes** before `swagger_url` is reachable.
+
 After apply, Terraform outputs:
 
 - `api_base_url`

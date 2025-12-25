@@ -31,6 +31,8 @@ terraform init
 terraform apply
 ```
 
+Note: after `terraform apply`, the instance boots via `user_data` and the API may take **a few minutes** before `swagger_url` is reachable.
+
 ### Get URLs + keys (for Swagger)
 
 ```bash
