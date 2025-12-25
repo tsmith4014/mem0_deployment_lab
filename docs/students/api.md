@@ -176,14 +176,14 @@ Visit: `http://YOUR_EC2_IP:8000/docs`
 
 ## Common Fields
 
-| Field | Type | Required | Description |
-|-------|------|----------|-------------|
-| `user_id` | string | No | User identifier for isolation |
-| `agent_id` | string | No | Agent identifier |
-| `run_id` | string | No | Run/session identifier |
-| `messages` | array | Yes (add) | Conversation messages |
-| `query` | string | Yes (search) | Search query text |
-| `limit` | integer | No | Max results (default: 10) |
+| Field      | Type    | Required     | Description                   |
+| ---------- | ------- | ------------ | ----------------------------- |
+| `user_id`  | string  | No           | User identifier for isolation |
+| `agent_id` | string  | No           | Agent identifier              |
+| `run_id`   | string  | No           | Run/session identifier        |
+| `messages` | array   | Yes (add)    | Conversation messages         |
+| `query`    | string  | Yes (search) | Search query text             |
+| `limit`    | integer | No           | Max results (default: 10)     |
 
 ---
 
@@ -236,7 +236,7 @@ const API_KEY = "your_api_key";
 
 const headers = {
   "Content-Type": "application/json",
-  "X-API-Key": API_KEY
+  "X-API-Key": API_KEY,
 };
 
 // Add memory
@@ -246,11 +246,15 @@ const addMemory = async () => {
     headers,
     body: JSON.stringify({
       messages: [
-        { role: "user", content: "I'm learning Docker. I like examples that show the exact commands to run." }
+        {
+          role: "user",
+          content:
+            "I'm learning Docker. I like examples that show the exact commands to run.",
+        },
       ],
       user_id: "riley_123",
-      infer: false
-    })
+      infer: false,
+    }),
   });
   return response.json();
 };
@@ -262,8 +266,8 @@ const searchMemory = async () => {
     headers,
     body: JSON.stringify({
       query: "What kind of examples does Riley prefer?",
-      user_id: "riley_123"
-    })
+      user_id: "riley_123",
+    }),
   });
   return response.json();
 };
