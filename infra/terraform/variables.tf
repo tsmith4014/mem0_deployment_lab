@@ -19,19 +19,23 @@ variable "aws_region" {
 variable "instance_type" {
   type        = string
   description = "EC2 instance type."
-  default     = "t3.medium"
+  default     = "t3.small"
 }
 
 variable "root_volume_size_gb" {
   type        = number
   description = "Root EBS volume size (GB)."
-  default     = 30
+  default     = 20
 }
 
 variable "ssh_key_name" {
   type        = string
-  description = "Existing EC2 Key Pair name to enable SSH. Leave empty to disable SSH access."
+  description = "Existing EC2 Key Pair name for SSH access (required for this lab)."
   default     = ""
+  validation {
+    condition     = length(trimspace(var.ssh_key_name)) > 0
+    error_message = "ssh_key_name must be set (students should use an existing EC2 key pair)."
+  }
 }
 
 variable "allowed_ssh_cidr" {
@@ -50,6 +54,60 @@ variable "expose_qdrant_public" {
   type        = bool
   description = "If true, open port 6333 to the internet. Default false."
   default     = false
+}
+
+variable "api_host" {
+  type        = string
+  description = "Bind address inside the API container."
+  default     = "0.0.0.0"
+}
+
+variable "docker_network_name" {
+  type        = string
+  description = "Docker network name used to connect the API and Qdrant containers."
+  default     = "mem0_network"
+}
+
+variable "api_container_name" {
+  type        = string
+  description = "Docker container name for the Mem0 API."
+  default     = "mem0_api"
+}
+
+variable "api_image_name" {
+  type        = string
+  description = "Docker image name/tag for the Mem0 API built on the instance."
+  default     = "mem0_api:latest"
+}
+
+variable "qdrant_container_name" {
+  type        = string
+  description = "Docker container name for Qdrant."
+  default     = "mem0_qdrant"
+}
+
+variable "qdrant_image" {
+  type        = string
+  description = "Qdrant Docker image (tagged). Consider pinning for classroom stability."
+  default     = "qdrant/qdrant:latest"
+}
+
+variable "qdrant_volume_name" {
+  type        = string
+  description = "Docker volume name for Qdrant persistence."
+  default     = "qdrant_data"
+}
+
+variable "qdrant_http_port" {
+  type        = number
+  description = "Qdrant HTTP port."
+  default     = 6333
+}
+
+variable "qdrant_grpc_port" {
+  type        = number
+  description = "Qdrant gRPC port."
+  default     = 6334
 }
 
 variable "repo_url" {

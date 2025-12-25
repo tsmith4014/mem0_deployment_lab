@@ -74,7 +74,7 @@ mem0_deployment_lab/
 
 ## Cost Estimate (Rough)
 
-- EC2 t3.medium: ~$30/month
+- EC2 (lab): `t3.small` is usually enough; use `t3.medium` if builds are slow
 - Bedrock usage: varies by model and traffic (typically pennies for lab usage)
 - **Total: ~$30/month + model usage**
 

@@ -32,8 +32,7 @@ Students need permission to run the Terraform in `infra/terraform/`. At a minimu
 
 Notes:
 
-- This lab does **not require SSH** (we typically leave `ssh_key_name` blank in `terraform.tfvars`).
-- If you want SSH for debugging, instructors can provide a key pair and restrict `allowed_ssh_cidr` to their IP.
+- For this lab, students should enable SSH in `terraform.tfvars` using an existing EC2 key pair, and restrict `allowed_ssh_cidr` to their IP.
 
 ### Copy/paste IAM policy (attach to the student group)
 

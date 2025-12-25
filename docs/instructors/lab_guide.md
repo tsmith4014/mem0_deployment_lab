@@ -187,7 +187,7 @@ Discover with Bedrock model access is enabled in what AWS account/region
 
 **Per Student:**
 
-- EC2 t3.medium: $0.0416/hour × 2 hours = $0.08
+- EC2 (example): t3.small is usually enough for the lab; t3.medium is a safer default if builds are slow.
 - Bedrock usage: varies by model and traffic (typically pennies for lab usage)
 - **Total: ~$0.10 per student**
 

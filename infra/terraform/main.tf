@@ -82,8 +82,8 @@ resource "aws_security_group_rule" "ingress_qdrant" {
   count             = var.expose_qdrant_public ? 1 : 0
   type              = "ingress"
   security_group_id = aws_security_group.mem0.id
-  from_port         = 6333
-  to_port           = 6333
+  from_port         = var.qdrant_http_port
+  to_port           = var.qdrant_http_port
   protocol          = "tcp"
   cidr_blocks       = ["0.0.0.0/0"]
   description       = "Qdrant HTTP (optional)"
@@ -209,18 +209,27 @@ resource "aws_instance" "mem0" {
   }
 
   user_data = templatefile("${path.module}/user_data.sh.tftpl", {
-    project_name       = var.project_name
-    repo_url           = var.repo_url
-    repo_ref           = var.repo_ref
-    api_port           = var.api_port
-    ssm_prefix         = local.ssm_prefix
-    llm_provider       = local.llm_provider
-    embedder_provider  = local.embedder_provider
-    aws_region_runtime = var.aws_region_runtime
-    openai_base_url    = var.openai_base_url
-    llm_model          = var.llm_model
-    llm_temperature    = var.llm_temperature
-    embedder_model     = var.embedder_model
+    project_name          = var.project_name
+    repo_url              = var.repo_url
+    repo_ref              = var.repo_ref
+    api_port              = var.api_port
+    api_host              = var.api_host
+    ssm_prefix            = local.ssm_prefix
+    llm_provider          = local.llm_provider
+    embedder_provider     = local.embedder_provider
+    aws_region_runtime    = var.aws_region_runtime
+    openai_base_url       = var.openai_base_url
+    llm_model             = var.llm_model
+    llm_temperature       = var.llm_temperature
+    embedder_model        = var.embedder_model
+    docker_network_name   = var.docker_network_name
+    api_container_name    = var.api_container_name
+    api_image_name        = var.api_image_name
+    qdrant_container_name = var.qdrant_container_name
+    qdrant_image          = var.qdrant_image
+    qdrant_volume_name    = var.qdrant_volume_name
+    qdrant_http_port      = var.qdrant_http_port
+    qdrant_grpc_port      = var.qdrant_grpc_port
   })
 
   tags = merge(local.tags, {

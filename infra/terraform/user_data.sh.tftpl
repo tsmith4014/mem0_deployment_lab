@@ -53,10 +53,10 @@ OPENAI_BASE_URL=${openai_base_url}
 
 AWS_REGION=${aws_region_runtime}
 
-QDRANT_HOST=mem0_qdrant
-QDRANT_PORT=6333
+QDRANT_HOST=${qdrant_container_name}
+QDRANT_PORT=${qdrant_http_port}
 
-API_HOST=0.0.0.0
+API_HOST=${api_host}
 API_PORT=${api_port}
 API_KEY=$${API_KEY}
 ADMIN_API_KEY=$${ADMIN_API_KEY}
@@ -70,37 +70,37 @@ EOF
 echo "=== Starting containers (docker run) ==="
 
 # Create network if missing
-docker network inspect mem0_network >/dev/null 2>&1 || docker network create mem0_network
+docker network inspect ${docker_network_name} >/dev/null 2>&1 || docker network create ${docker_network_name}
 
 # Start Qdrant (vector DB)
-docker rm -f mem0_qdrant >/dev/null 2>&1 || true
+docker rm -f ${qdrant_container_name} >/dev/null 2>&1 || true
 docker run -d \
-  --name mem0_qdrant \
-  --network mem0_network \
-  -p 6333:6333 \
-  -p 6334:6334 \
-  -v qdrant_data:/qdrant/storage \
-  -e QDRANT__SERVICE__GRPC_PORT=6334 \
+  --name ${qdrant_container_name} \
+  --network ${docker_network_name} \
+  -p ${qdrant_http_port}:${qdrant_http_port} \
+  -p ${qdrant_grpc_port}:${qdrant_grpc_port} \
+  -v ${qdrant_volume_name}:/qdrant/storage \
+  -e QDRANT__SERVICE__GRPC_PORT=${qdrant_grpc_port} \
   --restart unless-stopped \
-  qdrant/qdrant:latest
+  ${qdrant_image}
 
 # Build API image (uses classic docker build; avoids buildx requirements)
 echo "=== Building mem0_api image ==="
-docker build -t mem0_api:latest -f deployment/Dockerfile .
+docker build -t ${api_image_name} -f deployment/Dockerfile .
 docker images | head -n 20
 
 # Start Mem0 API
 echo "=== Starting mem0_api container ==="
-docker rm -f mem0_api >/dev/null 2>&1 || true
+docker rm -f ${api_container_name} >/dev/null 2>&1 || true
 docker run -d \
-  --name mem0_api \
-  --network mem0_network \
+  --name ${api_container_name} \
+  --network ${docker_network_name} \
   -p ${api_port}:${api_port} \
   --env-file .env \
-  -e QDRANT_HOST=mem0_qdrant \
-  -e QDRANT_PORT=6333 \
+  -e QDRANT_HOST=${qdrant_container_name} \
+  -e QDRANT_PORT=${qdrant_http_port} \
   --restart unless-stopped \
-  mem0_api:latest
+  ${api_image_name}
 
 echo "=== Mem0 Deployment Lab bootstrap complete ==="
 

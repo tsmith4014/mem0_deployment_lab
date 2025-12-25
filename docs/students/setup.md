@@ -19,6 +19,7 @@ This is the default for the lab: one `terraform apply` provisions the AWS resour
 - AWS credentials configured (AWS CLI / SSO / assumed role)
 - Terraform installed
 - Bedrock enabled in your AWS region and **model access granted**
+- An existing EC2 key pair (for SSH)
 
 ### Deploy
 
@@ -30,6 +31,13 @@ cp terraform.tfvars.example terraform.tfvars
 terraform init
 terraform apply
 ```
+
+### Configure SSH (required)
+
+In `infra/terraform/terraform.tfvars`, set:
+
+- `ssh_key_name` to an existing EC2 key pair name in your AWS account/region
+- `allowed_ssh_cidr` to your public IP with `/32` (recommended)
 
 Note: after `terraform apply`, the instance boots via `user_data` and the API may take **a few minutes** before `swagger_url` is reachable.
 

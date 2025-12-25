@@ -8,7 +8,7 @@ Goal: students can clone this repo, edit a small `terraform.tfvars`, run `terraf
   - `aws configure` (Access Key + Secret)
   - AWS SSO / assumed role
 - Terraform installed (v1.5+ recommended)
-- SSH key pair is optional (leave `ssh_key_name` blank for the lab)
+- An existing EC2 key pair for SSH (students should use an existing key pair and set `ssh_key_name` in `terraform.tfvars`)
 
 ## Quick Start
 
@@ -80,8 +80,10 @@ Credentials:
 
 - `project_name` (used for resource naming)
 - `aws_region`
-- `instance_type`
-- `allowed_ssh_cidr` (only if you enable SSH)
+- `instance_type` (lab: try `t3.small`; if builds are slow, use `t3.medium`)
+- `root_volume_size_gb` (lab: 20 GB; recommended: 30+ GB)
+- `ssh_key_name` (required for this lab)
+- `allowed_ssh_cidr` (your public IP/32 recommended)
 - `ai_mode` (`aws` or `openai`)
 
 ## Example tfvars
