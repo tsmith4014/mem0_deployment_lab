@@ -145,8 +145,8 @@ From the AWS Console:
 
 ### Testing & Exploration (15 min)
 
-- Run [`../../scripts/test_api.sh`](../../scripts/test_api.sh)
 - Explore Swagger UI
+- Seed demo users (`/v1/demo/seed/*`) and run a few searches
 - Try custom queries
 
 ### Wrap-Up (10 min)
@@ -230,7 +230,6 @@ Class of 30: ~$3.00 total
 - README.md (overview)
 - docs/students/setup.md (deployment steps)
 - docs/students/api.md (endpoint reference)
-- scripts/test_api.sh (testing)
 - All code files (src/, deployment/, requirements.txt, .env.template)
 
 ## Files YOU Need

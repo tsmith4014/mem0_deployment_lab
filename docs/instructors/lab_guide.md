@@ -13,6 +13,7 @@ Start: [`README.md`](README.md) • Student guide: [`../students/README.md`](../
 ## Learning Objectives
 
 By the end of this lab, students will be able to:
+
 1. Deploy a containerized FastAPI application to AWS EC2
 2. Configure and run a Qdrant vector database
 3. Integrate AWS Bedrock (Titan embeddings + Bedrock LLM) for semantic memory
@@ -24,24 +25,29 @@ By the end of this lab, students will be able to:
 ## Lab Structure
 
 ### Part 1: Environment Setup (20 min)
+
 - Deploy with Terraform (recommended)
 - (Optional) SSH to EC2 to observe containers/logs
 
 ### Part 2: Configuration (10 min)
+
 - Understand `.env` settings (providers/models/region)
 - Understand API key auth and where keys are stored (Terraform outputs / SSM)
 
 ### Part 3: Docker Deployment (15 min)
+
 - Observe the running services (FastAPI + Qdrant)
 - Verify `/health` and containers/logs
 
 ### Part 4: Testing & Exploration (25 min)
+
 - Run test script
 - Use Swagger UI
 - Test with curl/Postman
 - Understand API responses
 
 ### Part 5: Integration Discussion (10 min)
+
 - How to integrate with applications
 - Best practices
 - Q&A
@@ -51,21 +57,25 @@ By the end of this lab, students will be able to:
 ## Key Teaching Points
 
 ### 1. Why Vector Databases?
+
 - Traditional DBs: Exact match search
 - Vector DBs: Semantic similarity search
 - Use case: AI memory requires understanding meaning, not keywords
 
 ### 2. Why Docker?
+
 - Consistent environment across machines
 - Easy deployment and scaling
 - Isolated dependencies
 
 ### 3. API Design
+
 - RESTful principles
 - Authentication with API keys
 - Standard response formats
 
 ### 4. Production Considerations
+
 - Environment variables for secrets
 - Docker networking for service communication
 - Persistent volumes for data
@@ -75,15 +85,19 @@ By the end of this lab, students will be able to:
 ## Common Student Issues
 
 ### Issue 1: "Docker command not found"
+
 **Solution:** User needs to log out and back in after adding to docker group
 
 ### Issue 2: "Can't connect to API from browser"
+
 **Solution:** Check EC2 security group - port 8000 must be open
 
 ### Issue 3: "OpenAI API error"
+
 **Solution:** If using OpenAI track, verify OPENAI_API_KEY is set correctly. Otherwise (AWS track), verify Bedrock model access and IAM permissions.
 
 ### Issue 4: "Container keeps restarting"
+
 **Solution:** Check logs with `sudo docker logs mem0_api`
 
 ---
@@ -91,29 +105,34 @@ By the end of this lab, students will be able to:
 ## Checkpoints
 
 ### Checkpoint 1: Docker Installed
+
 ```bash
 docker --version
 ```
 
 ### Checkpoint 2: Files Uploaded
+
 ```bash
 ls ~/mem0_deployment_lab
-# Should see: src/, deployment/, docs/, scripts/, etc.
+# Should see: src/, deployment/, docs/, infra/, etc.
 ```
 
 ### Checkpoint 3: Environment Configured
+
 ```bash
 cat ~/mem0_deployment_lab/.env | grep -v "^#"
 # Should see provider + models + API_KEY filled in (AWS Bedrock by default)
 ```
 
 ### Checkpoint 4: Containers Running
+
 ```bash
 sudo docker ps
 # Should see mem0_api and mem0_qdrant running
 ```
 
 ### Checkpoint 5: Health Check Pass
+
 ```bash
 curl http://localhost:8000/health
 # Should return {"status": "healthy", ...}
@@ -126,16 +145,19 @@ curl http://localhost:8000/health
 For students who finish early:
 
 ### Easy Extensions
+
 1. Test all CRUD operations (Update, Delete)
 2. Create memories for multiple users
 3. Test user isolation
 
 ### Medium Extensions
+
 1. Write a Python script to integrate with the API
 2. Explore Qdrant dashboard at port 6333
 3. Discuss model usage/costs and how to monitor usage (CloudWatch/Billing + app metrics)
 
 ### Advanced Extensions
+
 1. Modify the FastAPI code to add a custom endpoint
 2. Set up nginx reverse proxy with SSL
 3. Implement rate limiting
@@ -146,12 +168,14 @@ For students who finish early:
 ## Assessment Ideas
 
 ### Knowledge Check Questions
+
 1. What is the difference between a vector database and a relational database?
 2. Why do we use Docker networks instead of localhost?
 3. What authentication method does this API use?
 4. How are embeddings generated in this system?
 
 ### Practical Assessment
+
 1. Successfully deploy the stack to EC2
 2. Add and search memories via API
 3. Explain the role of each component
@@ -164,6 +188,7 @@ For students who finish early:
 ### For Instructors
 
 **If containers won't start:**
+
 ```bash
 # Check available memory
 free -h
@@ -176,11 +201,13 @@ sudo docker system prune -a
 ```
 
 **If OpenAI is slow:**
+
 - Could be rate limiting
 - Check OpenAI dashboard for quota
 - Consider using smaller model for demo
 
 **If Qdrant connection fails:**
+
 - Ensure Qdrant container started first
 - Check Docker network: `sudo docker network inspect mem0_network`
 - Verify QDRANT_HOST env var is set to "mem0_qdrant"
@@ -189,17 +216,17 @@ sudo docker system prune -a
 
 ## Time Management
 
-| Activity | Estimated Time | Critical? |
-|----------|---------------|-----------|
-| EC2 connection | 5 min | Yes |
-| Docker installation | 15 min | Yes |
-| File upload | 5 min | Yes |
-| Configuration | 10 min | Yes |
-| Docker build | 10 min | Yes |
-| Start services | 5 min | Yes |
-| Testing | 15 min | Yes |
-| Swagger exploration | 10 min | No |
-| Discussion | 10 min | No |
+| Activity            | Estimated Time | Critical? |
+| ------------------- | -------------- | --------- |
+| EC2 connection      | 5 min          | Yes       |
+| Docker installation | 15 min         | Yes       |
+| File upload         | 5 min          | Yes       |
+| Configuration       | 10 min         | Yes       |
+| Docker build        | 10 min         | Yes       |
+| Start services      | 5 min          | Yes       |
+| Testing             | 15 min         | Yes       |
+| Swagger exploration | 10 min         | No        |
+| Discussion          | 10 min         | No        |
 
 **Critical path:** ~55 minutes  
 **Full lab:** 85 minutes
@@ -209,12 +236,14 @@ sudo docker system prune -a
 ## Pre-Lab Preparation
 
 ### Before Class
+
 1. Provision EC2 instances for students
 2. Ensure security groups have ports 22, 8000 open
 3. Test deployment on one instance
 4. Ensure Bedrock model access is enabled in your AWS account/region
 
 ### Materials Needed
+
 - EC2 SSH keys (one per student)
 - This repository URL or zip file
 - AWS account access with Bedrock enabled (and model access granted)
@@ -225,21 +254,24 @@ sudo docker system prune -a
 ## Post-Lab Debrief
 
 ### Discussion Questions
+
 1. What challenges did you face during deployment?
 2. How would you modify this for production use?
 3. What other use cases could benefit from vector databases?
 4. What security improvements would you add?
 
 ### Follow-Up Resources
-- Mem0 documentation: https://docs.mem0.ai
-- Qdrant documentation: https://qdrant.tech
-- FastAPI documentation: https://fastapi.tiangolo.com
+
+- Mem0 documentation: `https://docs.mem0.ai`
+- Qdrant documentation: `https://qdrant.tech`
+- FastAPI documentation: `https://fastapi.tiangolo.com`
 
 ---
 
 ## Cost Management
 
 **Per Student:**
+
 - EC2 t3.medium: $0.0416/hour × 2 hours = $0.08
 - Bedrock usage: varies by model and traffic (typically pennies for lab usage)
 - **Total: ~$0.10 per student**
@@ -253,6 +285,7 @@ sudo docker system prune -a
 ## Success Criteria
 
 Students should be able to:
+
 - Deploy the full stack independently
 - Successfully add and search memories
 - Explain the architecture
@@ -271,4 +304,3 @@ Students should be able to:
 ---
 
 **Questions?** Contact the course instructor.
-

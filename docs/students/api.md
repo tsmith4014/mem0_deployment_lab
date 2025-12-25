@@ -317,8 +317,9 @@ Run these via `POST /v1/memories/search` with the matching `user_id`:
   - `What does Tony check first when debugging?`
   - `What dashboard panels does Tony care about?`
 - Cheeky:
-  - `How do I get Tony’s attention fast?` (should match the “I am Iron Man (on-call)” issue title)
-  - `Does Tony run on coffee or espresso?`
+  - `How do I get Tony’s attention fast?` (should match the “STARK-LEVEL PRIORITY” label)
+  - `What kind of incident updates does Tony want?` (should match “JARVIS-style” updates)
+  - `If I ask Tony to edit YAML at 2am, what do I bring?` (yes, really)
 
 **Leia (`leia_organa_001`)**
 
@@ -328,8 +329,9 @@ Run these via `POST /v1/memories/search` with the matching `user_id`:
   - `What does Leia require before applying Terraform in prod?`
   - `Which SLO metrics does Leia watch?`
 - Cheeky:
-  - `How do I page Leia during an outage?` (should match “use the Force... then send one concise alert”)
   - `Does Leia like alert storms?` (should match “single channel / avoid alert fatigue”)
+  - `What does Leia call incident updates?` (should match “mission briefings”)
+  - `The graph looks like a moon. What does Leia assume?` (should match “scaling issue”)
 
 **Hermione (`hermione_granger_001`)**
 
@@ -340,7 +342,8 @@ Run these via `POST /v1/memories/search` with the matching `user_id`:
   - `What does Hermione want in git commits?`
 - Cheeky:
   - `What happens if I forget to update the README?`
-  - `Is this magic or permissions?` (should match “It's not magic—it's just logs and permissions.”)
+  - `Is this "magic" or is it configs/logs/permissions?` (should match her “rarely magic” preference)
+  - `Does Hermione tolerate "final_final_v3" filenames?`
 
 ### Challenge mode (try to “trick” the search)
 

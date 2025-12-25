@@ -43,15 +43,20 @@ terraform output -raw api_key
 terraform output -raw admin_api_key
 ```
 
-### Smoke test (run on the EC2 instance)
+### Quick verification (no scripts)
 
-SSH in, then:
+From your laptop (recommended), use the Terraform outputs:
 
 ```bash
-cd /opt/<project_name>/repo
-export API_KEY=$(grep '^API_KEY=' .env | cut -d'=' -f2)
-chmod +x scripts/test_api.sh
-./scripts/test_api.sh
+API_BASE_URL=$(cd infra/terraform && terraform output -raw api_base_url)
+API_KEY=$(cd infra/terraform && terraform output -raw api_key)
+
+curl -s "${API_BASE_URL}/health" | python3 -m json.tool
+
+# Seed fun demo users (no request body)
+curl -s -X POST "${API_BASE_URL}/v1/demo/seed/tony-stark" -H "X-API-Key: ${API_KEY}" | python3 -m json.tool
+curl -s -X POST "${API_BASE_URL}/v1/demo/seed/leia-organa" -H "X-API-Key: ${API_KEY}" | python3 -m json.tool
+curl -s -X POST "${API_BASE_URL}/v1/demo/seed/hermione-granger" -H "X-API-Key: ${API_KEY}" | python3 -m json.tool
 ```
 
 ---
@@ -125,8 +130,6 @@ sudo docker run -d \
 ```bash
 curl http://localhost:8000/health
 export API_KEY=$(grep '^API_KEY=' .env | cut -d'=' -f2)
-chmod +x scripts/test_api.sh
-./scripts/test_api.sh
 ```
 
 Open Swagger:

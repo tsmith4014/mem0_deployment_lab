@@ -40,7 +40,7 @@ Your App → FastAPI (Port 8000) → Mem0 SDK → Qdrant (Vector DB)
 
 ### 2. Test Your API (Students)
 
-- Smoke test script: [`scripts/test_api.sh`](scripts/test_api.sh)
+- Use Swagger UI and the demo seed endpoints (recommended): [`docs/students/api.md`](docs/students/api.md)
 
 ### 3. Use Swagger UI (Students)
 
@@ -53,7 +53,6 @@ Visit: `http://YOUR_EC2_IP:8000/docs`
 ```text
 mem0_deployment_lab/
 ├── docs/                 # All guides (students + instructors)
-├── scripts/              # Helper scripts (smoke tests, etc.)
 ├── src/                  # FastAPI application
 ├── deployment/           # Docker configuration
 ├── requirements.txt      # Python dependencies
@@ -87,7 +86,6 @@ mem0_deployment_lab/
 - **Students (do in order)**
   - [`docs/students/setup.md`](docs/students/setup.md): deploy + verify (Terraform recommended)
   - [`docs/students/api.md`](docs/students/api.md): Swagger + copy/paste examples for each endpoint
-  - [`scripts/test_api.sh`](scripts/test_api.sh): smoke tests against the API
   - [`docs/students/architecture.md`](docs/students/architecture.md) (optional): understand embeddings, vector DBs, and Mem0’s infer pipeline
 - **Instructors**
   - [`docs/instructors/lab_guide.md`](docs/instructors/lab_guide.md): structure, timing, checkpoints, extensions
