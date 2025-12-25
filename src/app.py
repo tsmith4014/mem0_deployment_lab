@@ -68,8 +68,8 @@ def custom_openapi():
         for path, path_item in openapi_schema["paths"].items():
             for method, operation in path_item.items():
                 if method.upper() in ["GET", "POST", "PUT", "DELETE", "PATCH"]:
-                    # Memory operations need X-API-Key
-                    if path.startswith("/v1/memories/"):
+                    # All v1 endpoints require X-API-Key (memory + demo seed routes)
+                    if path.startswith("/v1/"):
                         operation["security"] = [{"X-API-Key": []}]
                     # Admin operations need X-Admin-Key
                     elif path.startswith("/admin/"):

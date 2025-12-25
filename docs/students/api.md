@@ -287,3 +287,20 @@ They use `infer=false` for deterministic seeding.
 - `POST /v1/demo/seed/tony-stark`
 - `POST /v1/demo/seed/leia-organa`
 - `POST /v1/demo/seed/hermione-granger`
+
+Notes:
+
+- These endpoints have **no request body**. In Swagger, click **Authorize**, then **Execute**.
+- If you get “not authenticated” in Swagger, refresh the page after authorizing.
+
+### What to test / learn (quick checklist)
+
+1. **User isolation**
+   - Run `POST /v1/memories/get-all` with `user_id="tony_stark_001"` and confirm you only see Tony’s memories.
+2. **Semantic search**
+   - Try searches that don’t exactly match the stored text (you’re testing “meaning”, not keywords):
+     - `user_id="tony_stark_001"`, query: `How should I page Tony during an incident?`
+     - `user_id="leia_organa_001"`, query: `How often does Leia want outage updates?`
+     - `user_id="hermione_granger_001"`, query: `What kind of instructions does Hermione prefer?`
+3. **Why vectors matter**
+   - Compare a keyword-y query vs a rephrased query and notice search still finds the right memory.
