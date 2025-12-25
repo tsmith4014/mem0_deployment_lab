@@ -1,6 +1,14 @@
 """
 Memory management routes
 CRUD operations for memories: add, search, get, update, delete, history, reset
+
+How this file ties into the app:
+- Imported and registered in `src/app.py`
+- Uses the Mem0 `memory` singleton from `src/dependencies.py`
+
+Teaching note:
+- `infer=true` (default) means Mem0 uses an LLM to extract "facts" and decide what to store.
+- `infer=false` is great for labs because it forces deterministic storage of raw messages.
 """
 
 import time

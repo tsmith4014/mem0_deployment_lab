@@ -1,6 +1,12 @@
 """
 Health and monitoring routes
 Health checks, metrics, and alerts
+
+How this file ties into the app:
+- Imported and registered in `src/app.py`
+- Provides unauthenticated endpoints useful for verification and demos:
+  - `/health` for a simple uptime check
+  - `/metrics` and `/alerts` when observability is enabled
 """
 
 from fastapi import APIRouter, HTTPException

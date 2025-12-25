@@ -1,6 +1,16 @@
 """
 Shared dependencies for the Mem0 API
 Initialization and security functions
+
+This module is the "composition root" for the app:
+- Loads environment variables
+- Builds Mem0 configuration (Bedrock vs OpenAI providers)
+- Instantiates the Mem0 `Memory` singleton used by all routes
+- Defines API key verification dependencies for FastAPI routes
+
+Where it is used:
+- `src/app.py` imports `logger` and `OBSERVABILITY_ENABLED`
+- `src/routes/*` imports `memory`, `verify_api_key`, `verify_admin_key`
 """
 
 import os

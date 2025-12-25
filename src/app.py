@@ -1,6 +1,11 @@
 """
 Self-hosted Mem0 API Server
 Clean, modular FastAPI application with observability
+
+This is the FastAPI entrypoint:
+- Registers routers (`/v1/memories/*`, `/admin/*`, `/health`, etc.)
+- Adds optional observability middleware
+- Configures OpenAPI/Swagger to require API keys on the right routes
 """
 
 import os
@@ -67,7 +72,7 @@ def custom_openapi():
                     if path.startswith("/v1/memories/"):
                         operation["security"] = [{"X-API-Key": []}]
                     # Admin operations need X-Admin-Key
-                    elif path.startswith("/admin/") and not path.startswith("/admin/slack/"):
+                    elif path.startswith("/admin/"):
                         operation["security"] = [{"X-Admin-Key": []}]
                     # Health/metrics don't need auth (remove any existing security)
                     elif path in ["/", "/health", "/health/detailed", "/metrics", "/alerts"]:

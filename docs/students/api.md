@@ -66,10 +66,10 @@ X-API-Key: YOUR_KEY
 
 {
   "messages": [
-    {"role": "user", "content": "My name is John"},
-    {"role": "assistant", "content": "Hi John!"}
+    {"role": "user", "content": "My name is Riley. I'm on-call this week. Please page me by SMS after 8pm."},
+    {"role": "assistant", "content": "Got it. I’ll page you by SMS after 8pm while you’re on-call."}
   ],
-  "user_id": "john_123",
+  "user_id": "riley_123",
   "infer": false
 }
 ```
@@ -85,8 +85,8 @@ Content-Type: application/json
 X-API-Key: YOUR_KEY
 
 {
-  "query": "What is the user's name?",
-  "user_id": "john_123",
+  "query": "How should I notify Riley after hours?",
+  "user_id": "riley_123",
   "limit": 10
 }
 ```
@@ -100,7 +100,7 @@ Content-Type: application/json
 X-API-Key: YOUR_KEY
 
 {
-  "user_id": "john_123"
+  "user_id": "riley_123"
 }
 ```
 
@@ -196,9 +196,10 @@ response = requests.post(
     headers=headers,
     json={
         "messages": [
-            {"role": "user", "content": "I love pizza"}
+            {"role": "user", "content": "I'm learning Terraform and I prefer short, step-by-step checklists."}
         ],
-        "user_id": "user_123"
+        "user_id": "riley_123",
+        "infer": False
     }
 )
 print(response.json())
@@ -208,8 +209,8 @@ response = requests.post(
     f"{API_URL}/v1/memories/search",
     headers=headers,
     json={
-        "query": "What does the user like?",
-        "user_id": "user_123"
+        "query": "How should I format instructions for Riley?",
+        "user_id": "riley_123"
     }
 )
 print(response.json())
@@ -232,9 +233,10 @@ const addMemory = async () => {
     headers,
     body: JSON.stringify({
       messages: [
-        { role: "user", content: "I love pizza" }
+        { role: "user", content: "I'm learning Docker. I like examples that show the exact commands to run." }
       ],
-      user_id: "user_123"
+      user_id: "riley_123",
+      infer: false
     })
   });
   return response.json();
@@ -246,8 +248,8 @@ const searchMemory = async () => {
     method: "POST",
     headers,
     body: JSON.stringify({
-      query: "What does the user like?",
-      user_id: "user_123"
+      query: "What kind of examples does Riley prefer?",
+      user_id: "riley_123"
     })
   });
   return response.json();

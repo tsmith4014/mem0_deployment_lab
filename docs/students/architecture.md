@@ -9,7 +9,7 @@ Mem0 is an **intelligent memory layer** for AI applications. It remembers user c
 **Think of it like this:**
 
 - Regular chatbot: Forgets everything after each conversation
-- With Mem0: Remembers "Alice prefers emails in the morning" and uses that context forever
+- With Mem0: Remembers "Riley prefers SMS after 8pm while on-call" and uses that context later
 
 ---
 
@@ -43,23 +43,23 @@ Mem0 uses Bedrock for **two critical functions**:
 
 ### 1. Creating Embeddings (Vector Representations)
 
-When you add a memory like "User loves pizza", Mem0:
+When you add a memory like "Riley prefers SMS after 8pm while on-call", Mem0:
 
-1. Sends text to Bedrock Titan: `"User loves pizza"`
+1. Sends text to Bedrock Titan: `"Riley prefers SMS after 8pm while on-call"`
 2. Gets back a 1536-number vector: `[0.023, -0.15, 0.87, ...]`
 3. Stores vector in Qdrant for similarity search
 
 **Why vectors?** So we can find semantically similar memories:
 
 - Query: "What food does the user like?"
-- Matches: "User loves pizza" (even though words differ!)
+- Matches: "Riley prefers SMS after 8pm while on-call" (even if the query uses different wording)
 
 ### 2. Memory Extraction / Memory Actions (Optional but recommended)
 
 When `infer=true`, a Bedrock LLM analyzes conversation text to extract key facts and decide what to store:
 
 - Input: Chat transcript
-- Output: "User's name is Alice. Lives in Austin. Prefers morning emails."
+- Output: "User is Riley. Prefers SMS after 8pm while on-call."
 
 ---
 

@@ -1,5 +1,13 @@
 """
 FastAPI middleware for request tracking and observability
+
+What is middleware?
+Middleware runs "around" every request/response. It's a great place to add
+cross-cutting concerns like logging, metrics, tracing, and auth.
+
+How this file ties into the app:
+- `src/app.py` conditionally installs `ObservabilityMiddleware` when observability is enabled.
+- This middleware records request-level metrics into `metrics_collector` (see `src/observability.py`).
 """
 
 import time
@@ -26,7 +34,7 @@ class ObservabilityMiddleware(BaseHTTPMiddleware):
         method = request.method
         client_ip = request.client.host if request.client else "unknown"
         
-        # Try to extract user_id from request (for Marc's user-focused reporting)
+        # Try to extract user_id from request body (useful for per-user metrics)
         user_id = None
         try:
             if method in ["POST", "PUT", "DELETE"] and request.headers.get("content-type", "").startswith("application/json"):
@@ -45,7 +53,7 @@ class ObservabilityMiddleware(BaseHTTPMiddleware):
         except:
             pass
         
-        # Log incoming request (only if user-related for Marc)
+        # Log incoming request (keep logs focused on user/admin activity)
         if user_id or 'admin' in path:
             log_structured(
                 "info",
@@ -87,7 +95,7 @@ class ObservabilityMiddleware(BaseHTTPMiddleware):
             # Calculate duration
             duration = time.time() - start_time
             
-            # Record metrics (with user_id for Marc's reporting)
+            # Record metrics (include user_id when present for per-user reporting)
             endpoint = f"{method} {path}"
             metadata = {
                 'method': method,
@@ -106,7 +114,7 @@ class ObservabilityMiddleware(BaseHTTPMiddleware):
                 metadata=metadata
             )
             
-            # Log response (only user activity for Marc)
+            # Log response (keep logs focused on user/admin activity)
             if user_id or 'admin' in path:
                 log_structured(
                     "info" if success else "error",

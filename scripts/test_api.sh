@@ -30,10 +30,10 @@ curl -s -X POST "${API_URL}/v1/memories/add" \
   -H "X-API-Key: ${API_KEY}" \
   -d '{
     "messages": [
-      {"role": "user", "content": "My name is Alice and I love playing poker"},
-      {"role": "assistant", "content": "Nice to meet you Alice!"}
+      {"role": "user", "content": "My name is Riley. I am on-call this week. Please page me by SMS after 8pm."},
+      {"role": "assistant", "content": "Got it. I will page you by SMS after 8pm while you are on-call."}
     ],
-    "user_id": "alice_123"
+    "user_id": "riley_123"
     ,"infer": false
   }' | python3 -m json.tool
 echo ""
@@ -45,8 +45,8 @@ curl -s -X POST "${API_URL}/v1/memories/search" \
   -H "Content-Type: application/json" \
   -H "X-API-Key: ${API_KEY}" \
   -d '{
-    "query": "What is the user'\''s name?",
-    "user_id": "alice_123",
+    "query": "How should I notify Riley after hours?",
+    "user_id": "riley_123",
     "limit": 5
   }' | python3 -m json.tool
 echo ""
@@ -58,7 +58,7 @@ curl -s -X POST "${API_URL}/v1/memories/get-all" \
   -H "Content-Type: application/json" \
   -H "X-API-Key: ${API_KEY}" \
   -d '{
-    "user_id": "alice_123"
+    "user_id": "riley_123"
   }' | python3 -m json.tool
 echo ""
 echo ""

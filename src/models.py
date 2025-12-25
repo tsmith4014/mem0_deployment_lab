@@ -1,6 +1,15 @@
 """
 Pydantic models for request/response validation
 Clean data models for the Mem0 API
+
+These models power:
+- request validation (FastAPI automatically validates incoming JSON)
+- Swagger UI schemas + example payloads (the "Try it out" defaults)
+
+Teaching note:
+The example payloads below use a fun, realistic theme: a DevOps "On-Call Buddy"
+that remembers user preferences (how to get paged, tools they use, etc.). You can
+swap the theme easily by updating the `json_schema_extra` examples.
 """
 
 from pydantic import BaseModel, Field
@@ -10,14 +19,14 @@ from typing import List, Optional, Dict, Any
 class Message(BaseModel):
     """Message in a conversation"""
     role: str = Field(..., description="Role of the message sender (user, assistant, system)", examples=["user", "assistant"])
-    content: str = Field(..., description="Content of the message", examples=["I love playing poker"])
+    content: str = Field(..., description="Content of the message", examples=["I'm on-call this week. Please page me by SMS after 8pm."])
     
     model_config = {
         "json_schema_extra": {
             "examples": [
                 {
                     "role": "user",
-                    "content": "My name is Doug and I struggle with gambling addiction"
+                    "content": "My name is Riley. I'm on-call this week. Please page me by SMS after 8pm."
                 }
             ]
         }
@@ -27,7 +36,7 @@ class Message(BaseModel):
 class AddMemoryRequest(BaseModel):
     """Request model for adding memories"""
     messages: List[Message] = Field(..., description="List of conversation messages")
-    user_id: Optional[str] = Field(None, description="User identifier (e.g., doug_123, marc_456)")
+    user_id: Optional[str] = Field(None, description="User identifier (e.g., riley_123, casey_456)")
     agent_id: Optional[str] = Field(None, description="Agent identifier (optional)")
     run_id: Optional[str] = Field(None, description="Run identifier (replaces session_id in v1.0.0)")
     session_id: Optional[str] = Field(None, description="Legacy session identifier (mapped to run_id)")
@@ -51,14 +60,15 @@ class AddMemoryRequest(BaseModel):
                     "messages": [
                         {
                             "role": "user",
-                            "content": "My name is Doug and I live in Las Vegas. I struggle with card gambling."
+                            "content": "My name is Riley. I'm on-call this week. Please page me by SMS after 8pm."
                         },
                         {
                             "role": "assistant",
-                            "content": "Hello Doug, I'm here to help you with your gambling challenges."
+                            "content": "Got it. I’ll page you by SMS after 8pm while you’re on-call."
                         }
                     ],
-                    "user_id": "doug_123"
+                    "user_id": "riley_123",
+                    "infer": True
                 }
             ]
         }
@@ -68,7 +78,7 @@ class AddMemoryRequest(BaseModel):
 class SearchMemoryRequest(BaseModel):
     """Request model for searching memories"""
     query: str = Field(..., description="Search query (e.g., 'What is the user's name?')")
-    user_id: Optional[str] = Field(None, description="User identifier (e.g., doug_123)")
+    user_id: Optional[str] = Field(None, description="User identifier (e.g., riley_123)")
     agent_id: Optional[str] = Field(None, description="Agent identifier (optional)")
     run_id: Optional[str] = Field(None, description="Run identifier (optional)")
     session_id: Optional[str] = Field(None, description="Legacy session identifier (optional)")
@@ -78,8 +88,8 @@ class SearchMemoryRequest(BaseModel):
         "json_schema_extra": {
             "examples": [
                 {
-                    "query": "What triggers gambling urges for the user?",
-                    "user_id": "doug_123",
+                    "query": "How should I notify Riley after hours?",
+                    "user_id": "riley_123",
                     "limit": 10
                 }
             ]
@@ -97,7 +107,7 @@ class UpdateMemoryRequest(BaseModel):
             "examples": [
                 {
                     "memory_id": "550e8400-e29b-41d4-a716-446655440000",
-                    "data": "User's name is Douglas (preferred name: Doug)"
+                    "data": "Riley prefers SMS after 8pm when on-call."
                 }
             ]
         }
@@ -125,7 +135,7 @@ class GetAllMemoriesRequest(BaseModel):
     NOTE: You MUST provide at least ONE identifier (user_id, agent_id, or run_id)
     To get ALL memories across ALL users, use the admin endpoint: GET /admin/all-memories
     """
-    user_id: Optional[str] = Field(None, description="User identifier (e.g., doug_123)")
+    user_id: Optional[str] = Field(None, description="User identifier (e.g., riley_123)")
     agent_id: Optional[str] = Field(None, description="Agent identifier (optional)")
     run_id: Optional[str] = Field(None, description="Run identifier (optional)")
     session_id: Optional[str] = Field(None, description="Legacy session identifier (optional)")
@@ -134,7 +144,7 @@ class GetAllMemoriesRequest(BaseModel):
         "json_schema_extra": {
             "examples": [
                 {
-                    "user_id": "doug_123"
+                    "user_id": "riley_123"
                 }
             ]
         }

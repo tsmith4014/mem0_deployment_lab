@@ -1,6 +1,14 @@
 """
 Observability module for Mem0 API
-Tracks requests, OpenAI calls, metrics, and prepares for alerting
+Tracks requests, model usage (when available), metrics, and basic alerting.
+
+How this file ties into the app:
+- `src/middleware.py` records request metrics into `metrics_collector`.
+- Routes can call `log_structured(...)` for consistent JSON logs.
+
+Note on "cost":
+- This lab can run on AWS Bedrock or OpenAI.
+- Only OpenAI token/cost estimation is implemented today (see `OpenAITracker`).
 """
 
 import time
@@ -49,8 +57,8 @@ class MetricsCollector:
     def record_request(self, endpoint: str, duration: float, success: bool, 
                       tokens: int = 0, cost: float = 0.0, error: Optional[str] = None,
                       metadata: Optional[Dict[str, Any]] = None):
-        """Record a request with all relevant metrics (filters health checks for Marc)"""
-        # Filter out health checks and metrics endpoints - Marc wants user data only
+        """Record a request with relevant metrics (filters health/metrics endpoints to reduce noise)."""
+        # Filter out health checks and monitoring endpoints (teaching-friendly: focus on app usage)
         if endpoint in ["GET /health", "GET /health/detailed", "GET /metrics", "GET /alerts"]:
             return
         
@@ -64,7 +72,7 @@ class MetricsCollector:
             if not success:
                 self.metrics[key]['errors'] += 1
             
-            # Track user activity (most important for Marc)
+            # Track user activity (useful for multi-user demos and simple reporting)
             user_id = None
             if metadata:
                 user_id = metadata.get('user_id')
@@ -113,7 +121,7 @@ class MetricsCollector:
                 logger.info(json.dumps(log_entry))
     
     def get_metrics(self) -> Dict[str, Any]:
-        """Get current metrics snapshot - USER-FOCUSED for Marc"""
+        """Get current metrics snapshot (user-focused)."""
         with self.lock:
             summary = {}
             for endpoint, data in self.metrics.items():
@@ -129,7 +137,7 @@ class MetricsCollector:
                     'avg_duration_ms': round(avg_duration * 1000, 2),
                     'total_tokens': data['total_tokens'],
                     'total_cost_usd': round(data['total_cost'], 4),
-                    'unique_users': len(data['users'])  # Marc wants to see user count
+                    'unique_users': len(data['users'])
                 }
             
             # Convert user activity for serialization (sets can't be JSON-encoded)
@@ -151,13 +159,20 @@ class MetricsCollector:
             
             return {
                 'summary': summary,
-                'user_activity': user_summary,  # Key insight for Marc
+                'user_activity': user_summary,
                 'total_unique_users': len(self.user_activity),
+                # Keep both keys for compatibility with earlier code.
                 'recent_user_requests': user_requests,  # Only user actions, no health checks
+                'recent_requests': user_requests,
+                # "model_usage" is generic; OpenAI-specific cost tracking is optional.
+                'model_usage': {
+                    'total_cost_usd': round(sum(d['total_cost'] for d in self.metrics.values()), 4),
+                    'total_tokens': sum(d['total_tokens'] for d in self.metrics.values())
+                },
                 'openai_costs': {
                     'total_cost_usd': round(sum(d['total_cost'] for d in self.metrics.values()), 4),
                     'total_tokens': sum(d['total_tokens'] for d in self.metrics.values())
-                }
+                },
             }
     
     def get_recent_errors(self, limit: int = 20) -> list:
@@ -271,15 +286,14 @@ class OpenAITracker:
 
 
 class AlertManager:
-    """Manage alerts and prepare for Slack integration"""
+    """Manage basic alerts (in-memory)."""
     
     def __init__(self):
         self.alert_history = []
         self.max_history = 100
-        self.slack_webhook_url = None  # Set via env var later
     
     def record_alert(self, alert: Dict[str, Any]):
-        """Record an alert (for now just logging, later Slack)"""
+        """Record an alert (for now just logging)."""
         alert['timestamp'] = datetime.utcnow().isoformat()
         alert['acknowledged'] = False
         
@@ -295,13 +309,6 @@ class AlertManager:
             'alert': alert
         }))
         
-        # TODO: Send to Slack when webhook is configured
-        # self._send_to_slack(alert)
-    
-    def _send_to_slack(self, alert: Dict[str, Any]):
-        """Send alert to Slack (implement when ready)"""
-        # Placeholder for Slack integration
-        pass
     
     def get_active_alerts(self) -> list:
         """Get unacknowledged alerts"""

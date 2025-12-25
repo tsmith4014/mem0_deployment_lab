@@ -1,6 +1,13 @@
 """
 Admin and Business Intelligence routes
-System stats, user activity, triggers, database health, Slack integration
+
+These endpoints are optional "extras" for instructors/admins:
+- system stats (basic operational overview)
+- user activity summaries
+- database health
+
+Note: This repo intentionally does NOT include Slack integration. That can be a
+stretch goal later (wire up a webhook and add authenticated endpoints).
 """
 
 from fastapi import APIRouter, HTTPException, Depends
@@ -10,7 +17,6 @@ from dependencies import (
     BI_ENABLED,
     bi
 )
-from business_intelligence import format_for_slack
 
 router = APIRouter(prefix="/admin", tags=["Admin & Business Intelligence"])
 
@@ -18,7 +24,7 @@ router = APIRouter(prefix="/admin", tags=["Admin & Business Intelligence"])
 @router.get("/stats")
 async def get_system_stats(admin_key: str = Depends(verify_admin_key)):
     """
-    Get system overview stats (for Slack /mem0-stats command)
+    Get system overview stats (admin only)
     Requires X-Admin-Key header
     """
     if not BI_ENABLED:
@@ -35,29 +41,12 @@ async def get_system_stats(admin_key: str = Depends(verify_admin_key)):
         raise HTTPException(status_code=500, detail=str(e))
 
 
-@router.post("/slack/stats")
-async def slack_system_stats():
-    """
-    Slack slash command endpoint for /mem0-stats
-    No auth required - validated by Slack signing secret
-    """
-    if not BI_ENABLED:
-        return {"text": "Business Intelligence not enabled"}
-    
-    try:
-        stats = bi.get_system_overview()
-        return format_for_slack(stats, 'system_overview')
-    except Exception as e:
-        logger.error(f"Error in Slack stats: {str(e)}")
-        return {"text": f"Error: {str(e)}"}
-
-
 @router.get("/users")
 async def get_user_activity(
     days: int = 7,
     admin_key: str = Depends(verify_admin_key)
 ):
-    """Get user activity report (for Slack /mem0-users command)"""
+    """Get user activity report (admin only)"""
     if not BI_ENABLED:
         return {"error": "Business Intelligence not enabled"}
     
@@ -72,57 +61,12 @@ async def get_user_activity(
         raise HTTPException(status_code=500, detail=str(e))
 
 
-@router.post("/slack/users")
-async def slack_user_activity():
-    """Slack slash command endpoint for /mem0-users"""
-    if not BI_ENABLED:
-        return {"text": "Business Intelligence not enabled"}
-    
-    try:
-        report = bi.get_user_activity_report(days=7)
-        return format_for_slack(report, 'user_activity')
-    except Exception as e:
-        logger.error(f"Error in Slack user activity: {str(e)}")
-        return {"text": f"Error: {str(e)}"}
-
-
-@router.get("/triggers")
-async def get_trigger_analysis(admin_key: str = Depends(verify_admin_key)):
-    """Get gambling trigger analysis (for Slack /mem0-triggers command)"""
-    if not BI_ENABLED:
-        return {"error": "Business Intelligence not enabled"}
-    
-    try:
-        analysis = bi.get_trigger_analysis()
-        return {
-            "status": "success",
-            "data": analysis
-        }
-    except Exception as e:
-        logger.error(f"Error getting trigger analysis: {str(e)}")
-        raise HTTPException(status_code=500, detail=str(e))
-
-
-@router.post("/slack/triggers")
-async def slack_trigger_analysis():
-    """Slack slash command endpoint for /mem0-triggers"""
-    if not BI_ENABLED:
-        return {"text": "Business Intelligence not enabled"}
-    
-    try:
-        analysis = bi.get_trigger_analysis()
-        return format_for_slack(analysis, 'triggers')
-    except Exception as e:
-        logger.error(f"Error in Slack trigger analysis: {str(e)}")
-        return {"text": f"Error: {str(e)}"}
-
-
 @router.get("/user/{user_id}")
 async def get_user_report(
     user_id: str,
     admin_key: str = Depends(verify_admin_key)
 ):
-    """Get detailed report for a specific user (for Slack /mem0-user command)"""
+    """Get detailed report for a specific user (admin only)"""
     if not BI_ENABLED:
         return {"error": "Business Intelligence not enabled"}
     
@@ -135,28 +79,6 @@ async def get_user_report(
     except Exception as e:
         logger.error(f"Error getting user report: {str(e)}")
         raise HTTPException(status_code=500, detail=str(e))
-
-
-@router.post("/slack/user")
-async def slack_user_report():
-    """
-    Slack slash command endpoint for /mem0-user <user_id>
-    Expects: {"text": "user_id"}
-    """
-    if not BI_ENABLED:
-        return {"text": "Business Intelligence not enabled"}
-    
-    try:
-        # Parse user_id from Slack command
-        # In production, you'd parse request.form['text']
-        # For now, return instructions
-        return {
-            "response_type": "ephemeral",
-            "text": "Usage: /mem0-user <user_id>\nExample: /mem0-user chad_123"
-        }
-    except Exception as e:
-        logger.error(f"Error in Slack user report: {str(e)}")
-        return {"text": f"Error: {str(e)}"}
 
 
 @router.get("/common-memories")
