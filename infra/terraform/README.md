@@ -110,4 +110,5 @@ aws ssm get-parameter --with-decryption \
 ```
 
 If you SSH to the instance, it’s also written into:
+
 - `/opt/<project_name>/repo/.env`
