@@ -36,13 +36,13 @@ output "ssm_admin_api_key_name" {
 }
 
 output "ssh_command" {
-  value       = var.ssh_key_name != "" ? "ssh -i \"${var.ssh_key_name}.pem\" ec2-user@${aws_instance.mem0.public_dns}" : "SSH not enabled (no key pair configured)"
-  description = "SSH command to connect to the EC2 instance (using DNS name)."
+  value       = var.ssh_key_name != "" ? "ssh -i ${var.ssh_key_name}.pem ec2-user@${aws_instance.mem0.public_dns}" : "SSH not enabled (no key pair configured)"
+  description = "SSH command to connect to the EC2 instance (using DNS name). Copy/paste ready."
 }
 
 output "ssh_command_ip" {
-  value       = var.ssh_key_name != "" ? "ssh -i \"${var.ssh_key_name}.pem\" ec2-user@${aws_instance.mem0.public_ip}" : "SSH not enabled (no key pair configured)"
-  description = "SSH command to connect to the EC2 instance (using IP address)."
+  value       = var.ssh_key_name != "" ? "ssh -i ${var.ssh_key_name}.pem ec2-user@${aws_instance.mem0.public_ip}" : "SSH not enabled (no key pair configured)"
+  description = "SSH command to connect to the EC2 instance (using IP address). Copy/paste ready."
 }
 
 
