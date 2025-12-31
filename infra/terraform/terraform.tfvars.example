@@ -3,16 +3,17 @@
 # Terraform Overrides
 # =========================
 
+# IMPORTANT: Make these unique to avoid conflicts with other students!
 # Naming / tagging
-project_name = "mem0-deployment-lab"
-owner        = "student"
+project_name = "mem0-deployment-lab"    # ⚠️ CHANGE THIS! Add your name (e.g., "mem0-lab-alice")
+owner        = "student"                # Change to your name or student ID
 
 # AWS
 aws_region = "us-east-1"
 
 # EC2
 instance_type         = "t3.small"       # lab default (cheaper). If builds fail or are too slow, use t3.medium.
-root_volume_size_gb   = 20              # lab default. Recommended: 30+ GB for longer-lived/prod usage.
+root_volume_size_gb   = 30              # lab default. Recommended: 30+ GB for longer-lived/prod usage.
 ssh_key_name          = ""              # REQUIRED for class: set to your existing EC2 key pair name.
 allowed_ssh_cidr      = "0.0.0.0/0"     # change to YOUR_IP/32 for safety
 expose_qdrant_public  = false           # keep false for labs unless you need it

@@ -28,16 +28,23 @@ From repo root:
 ```bash
 cd infra/terraform
 cp terraform.tfvars.example terraform.tfvars
+```
+
+**STOP: Edit `terraform.tfvars` before running Terraform!**
+
+Open `terraform.tfvars` and set:
+
+1. **`project_name`** → Make this unique (e.g., `"mem0-lab-alice"`) to avoid conflicts with other students
+2. **`owner`** → Set to your name or student ID (for tracking)
+3. **`ssh_key_name`** → Set to an existing EC2 key pair name in your AWS account/region
+4. **`allowed_ssh_cidr`** → Set to your public IP with `/32` (recommended for security)
+
+Then run:
+
+```bash
 terraform init
 terraform apply
 ```
-
-### Configure SSH (required)
-
-In `infra/terraform/terraform.tfvars`, set:
-
-- `ssh_key_name` to an existing EC2 key pair name in your AWS account/region
-- `allowed_ssh_cidr` to your public IP with `/32` (recommended)
 
 Note: after `terraform apply`, the instance boots via `user_data` and the API may take **a few minutes** before `swagger_url` is reachable.
 
