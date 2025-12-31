@@ -46,6 +46,8 @@ terraform init
 terraform apply
 ```
 
+**About `.terraform.lock.hcl`**: When you run `terraform init`, you'll notice a `.terraform.lock.hcl` file already exists in the repo. This is Terraform's **dependency lock file** that pins specific provider versions (similar to `package-lock.json` in Node.js or `requirements.txt` in Python). It ensures everyone in the class uses the exact same AWS provider version, preventing "works on my machine" issues. The lock file is committed to git and should not be deleted.
+
 Note: after `terraform apply`, the instance boots via `user_data` and the API may take **a few minutes** before `swagger_url` is reachable.
 
 ### Get URLs + keys (for Swagger)
@@ -58,7 +60,17 @@ terraform output -raw api_key
 terraform output -raw admin_api_key
 ```
 
-### Use Swagger (this is the lab)
+**SSH Access**: If you configured `ssh_key_name` in your `terraform.tfvars`, you can get a ready-to-use SSH command:
+
+```bash
+terraform output -raw ssh_command
+```
+
+This will output something like: `ssh -i "your-key.pem" ec2-user@ec2-x-x-x-x.compute-1.amazonaws.com`
+
+You can copy and paste this directly into your terminal to connect to the EC2 instance for debugging.
+
+### Use Swagger (this is the exploration part of the lab)
 
 - Open the Swagger URL from Terraform output: `terraform output -raw swagger_url`
 - Click **Authorize**
