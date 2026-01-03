@@ -15,6 +15,7 @@ Where it is used:
 
 import os
 import logging
+import secrets
 from mem0 import Memory
 from fastapi import HTTPException, Security
 from fastapi.security import APIKeyHeader
@@ -31,23 +32,93 @@ logging.basicConfig(
 )
 logger = logging.getLogger(__name__)
 
-# API Key security
-API_KEY = os.getenv("API_KEY", "your_secure_api_key_here")
-ADMIN_API_KEY = os.getenv("ADMIN_API_KEY", API_KEY)
+
+class KeyManager:
+    """
+    Manages API keys with support for rotation via AWS SSM Parameter Store.
+
+    Keys are stored in memory for fast verification but can be rotated
+    and persisted to SSM for durability across container restarts.
+    """
+
+    def __init__(self):
+        self.api_key = os.getenv("API_KEY", "your_secure_api_key_here")
+        self.admin_api_key = os.getenv("ADMIN_API_KEY", self.api_key)
+        self.ssm_prefix = os.getenv("SSM_PREFIX", "")
+        self._ssm_client = None
+
+    @property
+    def ssm_client(self):
+        """Lazy-load boto3 SSM client"""
+        if self._ssm_client is None:
+            import boto3
+            self._ssm_client = boto3.client(
+                'ssm',
+                region_name=os.getenv("AWS_REGION", "us-east-1")
+            )
+        return self._ssm_client
+
+    def rotate_keys(self, rotate_api_key: bool = True, rotate_admin_key: bool = True) -> dict:
+        """
+        Rotate API keys, update SSM Parameter Store, and return new keys.
+
+        Args:
+            rotate_api_key: Whether to rotate the API key
+            rotate_admin_key: Whether to rotate the Admin API key
+
+        Returns:
+            Dict with the new key values
+        """
+        result = {}
+
+        if rotate_api_key:
+            new_api_key = secrets.token_urlsafe(32)
+            self.api_key = new_api_key
+            result["api_key"] = new_api_key
+
+            if self.ssm_prefix:
+                self._update_ssm_parameter(f"{self.ssm_prefix}/API_KEY", new_api_key)
+                logger.info(f"Rotated API_KEY in SSM: {self.ssm_prefix}/API_KEY")
+
+        if rotate_admin_key:
+            new_admin_key = secrets.token_urlsafe(32)
+            self.admin_api_key = new_admin_key
+            result["admin_api_key"] = new_admin_key
+
+            if self.ssm_prefix:
+                self._update_ssm_parameter(f"{self.ssm_prefix}/ADMIN_API_KEY", new_admin_key)
+                logger.info(f"Rotated ADMIN_API_KEY in SSM: {self.ssm_prefix}/ADMIN_API_KEY")
+
+        return result
+
+    def _update_ssm_parameter(self, name: str, value: str):
+        """Update an SSM SecureString parameter"""
+        self.ssm_client.put_parameter(
+            Name=name,
+            Value=value,
+            Type='SecureString',
+            Overwrite=True
+        )
+
+
+# Global key manager instance
+key_manager = KeyManager()
+
+# API Key security headers
 api_key_header = APIKeyHeader(name="X-API-Key", auto_error=True)
 admin_key_header = APIKeyHeader(name="X-Admin-Key", auto_error=True)
 
 
 async def verify_api_key(api_key: str = Security(api_key_header)):
     """Verify API key for memory operations"""
-    if api_key != API_KEY:
+    if api_key != key_manager.api_key:
         raise HTTPException(status_code=403, detail="Invalid API Key")
     return api_key
 
 
 async def verify_admin_key(admin_key: str = Security(admin_key_header)):
     """Verify admin key for BI/admin operations"""
-    if admin_key != ADMIN_API_KEY:
+    if admin_key != key_manager.admin_api_key:
         raise HTTPException(status_code=403, detail="Invalid Admin Key")
     return admin_key
 

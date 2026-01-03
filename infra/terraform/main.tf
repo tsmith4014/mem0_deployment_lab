@@ -8,13 +8,19 @@ locals {
   llm_provider      = var.ai_mode == "aws" ? "aws_bedrock" : "openai"
   embedder_provider = var.ai_mode == "aws" ? "aws_bedrock" : "openai"
 
-  # Keys (auto-generate if blank)
+  # Keys (auto-generate if blank) - each key is independently generated
   effective_api_key       = var.api_key != "" ? var.api_key : random_password.api_key.result
-  effective_admin_api_key = var.admin_api_key != "" ? var.admin_api_key : local.effective_api_key
+  effective_admin_api_key = var.admin_api_key != "" ? var.admin_api_key : random_password.admin_api_key.result
 
   # SSM parameter prefix
   ssm_prefix = "/${var.project_name}"
 }
+
+resource "aws_key_pair" "my_key" {
+  key_name   = "kh_try2"
+  public_key = file("~/.ssh/kh_try2.pub")
+}
+
 
 data "aws_vpc" "default" {
   default = true
@@ -36,7 +42,14 @@ data "aws_ami" "al2023" {
   }
 }
 
+
+
 resource "random_password" "api_key" {
+  length  = 32
+  special = false
+}
+
+resource "random_password" "admin_api_key" {
   length  = 32
   special = false
 }
@@ -120,9 +133,20 @@ data "aws_iam_policy_document" "ssm_read_params" {
     )
   }
 
-  # Needed to decrypt SecureString parameters (lab-friendly, broad)
+  # Allow writing to API key parameters for key rotation
   statement {
-    actions   = ["kms:Decrypt"]
+    actions = [
+      "ssm:PutParameter",
+    ]
+    resources = [
+      aws_ssm_parameter.api_key.arn,
+      aws_ssm_parameter.admin_api_key.arn,
+    ]
+  }
+
+  # Needed to decrypt/encrypt SecureString parameters (lab-friendly, broad)
+  statement {
+    actions   = ["kms:Decrypt", "kms:Encrypt", "kms:GenerateDataKey"]
     resources = ["*"]
   }
 }
@@ -196,12 +220,12 @@ resource "aws_ssm_parameter" "openai_api_key" {
 resource "aws_instance" "mem0" {
   ami                         = data.aws_ami.al2023.id
   instance_type               = var.instance_type
-  subnet_id                   = data.aws_subnets.default.ids[0]
+  subnet_id                   = element(data.aws_subnets.default.ids, 0)
   vpc_security_group_ids      = [aws_security_group.mem0.id]
   iam_instance_profile        = aws_iam_instance_profile.ec2.name
   associate_public_ip_address = true
 
-  key_name = var.ssh_key_name != "" ? var.ssh_key_name : null
+  key_name = aws_key_pair.my_key.key_name
 
   root_block_device {
     volume_size = var.root_volume_size_gb
