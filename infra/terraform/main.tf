@@ -18,9 +18,11 @@ locals {
   ssm_prefix = "/${var.project_name}"
 }
 
+# Key pair is created only when ssh_public_key_path is provided
 resource "aws_key_pair" "my_key" {
-  key_name   = "kh_try2"
-  public_key = file("~/.ssh/kh_try2.pub")
+  count      = var.ssh_public_key_path != "" ? 1 : 0
+  key_name   = var.ssh_key_name
+  public_key = file(var.ssh_public_key_path)
 }
 
 
@@ -227,7 +229,7 @@ resource "aws_instance" "mem0" {
   iam_instance_profile        = aws_iam_instance_profile.ec2.name
   associate_public_ip_address = true
 
-  key_name = aws_key_pair.my_key.key_name
+  key_name = var.ssh_public_key_path != "" ? aws_key_pair.my_key[0].key_name : var.ssh_key_name != "" ? var.ssh_key_name : null
 
   root_block_device {
     volume_size = var.root_volume_size_gb
