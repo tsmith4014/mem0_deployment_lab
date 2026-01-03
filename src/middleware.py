@@ -44,13 +44,13 @@ class ObservabilityMiddleware(BaseHTTPMiddleware):
                 try:
                     body_json = json.loads(body) if body else {}
                     user_id = body_json.get("user_id")
-                except:
+                except (json.JSONDecodeError, TypeError):
                     pass
                 # Create new request with body intact
                 async def receive():
                     return {"type": "http.request", "body": body}
                 request._receive = receive
-        except:
+        except Exception:
             pass
         
         # Log incoming request (keep logs focused on user/admin activity)

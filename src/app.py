@@ -11,7 +11,6 @@ This is the FastAPI entrypoint:
 import os
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
-from fastapi.openapi.models import SecurityScheme, SecuritySchemeType
 from dependencies import logger, OBSERVABILITY_ENABLED
 
 # Import observability middleware

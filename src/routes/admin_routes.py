@@ -11,14 +11,91 @@ stretch goal later (wire up a webhook and add authenticated endpoints).
 """
 
 from fastapi import APIRouter, HTTPException, Depends
+from pydantic import BaseModel
+from typing import Optional
 from dependencies import (
     verify_admin_key,
     logger,
     BI_ENABLED,
-    bi
+    bi,
+    key_manager
 )
 
+
+class KeyRotateRequest(BaseModel):
+    """Request body for key rotation"""
+    rotate_api_key: bool = True
+    rotate_admin_key: bool = True
+
+
+class KeyRotateResponse(BaseModel):
+    """Response from key rotation"""
+    status: str
+    message: str
+    api_key: Optional[str] = None
+    admin_api_key: Optional[str] = None
+    warning: Optional[str] = None
+
 router = APIRouter(prefix="/admin", tags=["Admin & Business Intelligence"])
+
+
+@router.post("/keys/rotate", response_model=KeyRotateResponse)
+async def rotate_keys(
+    request: KeyRotateRequest = KeyRotateRequest(),
+    admin_key: str = Depends(verify_admin_key)
+):
+    """
+    Rotate API keys (Admin only)
+
+    Generates new random keys and updates AWS SSM Parameter Store.
+    Old keys will no longer work immediately after rotation.
+
+    **IMPORTANT:** Save the returned keys - they won't be shown again!
+
+    Requires X-Admin-Key header.
+
+    Args:
+        rotate_api_key: Whether to rotate the API key (default: true)
+        rotate_admin_key: Whether to rotate the Admin API key (default: true)
+
+    Returns:
+        New key values. Store these securely!
+    """
+    try:
+        if not request.rotate_api_key and not request.rotate_admin_key:
+            raise HTTPException(
+                status_code=400,
+                detail="At least one key must be rotated"
+            )
+
+        new_keys = key_manager.rotate_keys(
+            rotate_api_key=request.rotate_api_key,
+            rotate_admin_key=request.rotate_admin_key
+        )
+
+        # Build response
+        response = KeyRotateResponse(
+            status="success",
+            message="Keys rotated successfully",
+            api_key=new_keys.get("api_key"),
+            admin_api_key=new_keys.get("admin_api_key")
+        )
+
+        # Add warning if SSM prefix is not configured
+        if not key_manager.ssm_prefix:
+            response.warning = (
+                "SSM_PREFIX not configured - keys updated in memory only. "
+                "Keys will reset to original values on container restart."
+            )
+
+        logger.info(f"Keys rotated: api_key={request.rotate_api_key}, admin_key={request.rotate_admin_key}")
+        return response
+
+    except HTTPException:
+        raise
+    except Exception as e:
+        logger.error(f"Error rotating keys: {str(e)}")
+        raise HTTPException(status_code=500, detail=f"Key rotation failed: {str(e)}")
 
 
 @router.get("/stats")
