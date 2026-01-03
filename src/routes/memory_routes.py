@@ -215,7 +215,7 @@ async def delete_memory(
 ):
     """Delete a specific memory"""
     try:
-        result = memory.delete(memory_id=request.memory_id)
+        memory.delete(memory_id=request.memory_id)
         
         return {
             "status": "success",
@@ -266,7 +266,7 @@ async def reset_memory(
         if run_id:
             kwargs["run_id"] = run_id
         
-        result = memory.reset(**kwargs)
+        memory.reset(**kwargs)
         
         return {
             "status": "success",

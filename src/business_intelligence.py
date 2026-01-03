@@ -11,10 +11,9 @@ read and modify it easily. You can swap the theme by changing the keyword lists.
 """
 
 import os
-import json
 import requests
-from typing import Dict, Any, List, Optional
-from datetime import datetime, timedelta
+from typing import Dict, Any, List
+from datetime import datetime
 from collections import Counter, defaultdict
 from mem0 import Memory
 from observability import metrics_collector, log_structured

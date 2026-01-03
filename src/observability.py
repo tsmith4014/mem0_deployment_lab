@@ -11,14 +11,12 @@ Note on "cost":
 - Only OpenAI token/cost estimation is implemented today (see `OpenAITracker`).
 """
 
-import time
 import json
 import logging
 from typing import Dict, Any, Optional
 from datetime import datetime
 from collections import defaultdict
 from threading import Lock
-import traceback
 
 # Configure structured logging
 logging.basicConfig(
