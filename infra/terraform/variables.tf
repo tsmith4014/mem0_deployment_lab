@@ -30,12 +30,14 @@ variable "root_volume_size_gb" {
 
 variable "ssh_key_name" {
   type        = string
-  description = "Existing EC2 Key Pair name for SSH access (required for this lab)."
+  description = "EC2 Key Pair name for SSH access."
   default     = ""
-  # validation {
-  #   condition     = length(trimspace(var.ssh_key_name)) > 0
-  #   error_message = "ssh_key_name must be set (students should use an existing EC2 key pair)."
-  # }
+}
+
+variable "ssh_public_key_path" {
+  type        = string
+  description = "Path to SSH public key file. If provided, creates a new key pair. Leave empty to skip key pair creation."
+  default     = ""
 }
 
 variable "allowed_ssh_cidr" {
